@@ -15,6 +15,7 @@ pub struct PaneZone {
 }
 
 impl PaneZone {
+    /// Get what to currently render
     pub fn view(&mut self, theme: &Theme) -> Element<Message> {
         PaneGrid::new(&mut self.panes, |pane, content| {
             content.view(pane, theme).into()
@@ -24,6 +25,8 @@ impl PaneZone {
         .style(theme)
         .into()
     }
+
+    /// Process the given message
     pub fn update(&mut self, msg: PaneMessage) {
         match msg {
             PaneMessage::Split(axis, pane) => {
@@ -41,6 +44,7 @@ impl PaneZone {
         }
     }
 }
+
 impl Default for PaneZone {
     fn default() -> Self {
         let (panes, _) = pane_grid::State::new(PaneState::default());

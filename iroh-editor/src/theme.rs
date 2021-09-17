@@ -1,5 +1,6 @@
 use iced::{button, container, pane_grid, Background, Color, Vector};
 
+/// Represents the currently in-use theme. This provides a way to get colours semantically, as in by their purpose.
 #[derive(Debug, Clone)]
 pub enum Theme {
     Dark,
@@ -96,6 +97,7 @@ impl Default for Theme {
     }
 }
 
+/// A style we apply to containers
 struct ContainerStyle {
     text: Color,
     bg: Color,
@@ -112,6 +114,7 @@ impl container::StyleSheet for ContainerStyle {
     }
 }
 
+/// A style we apply to buttons
 struct ButtonStyle {
     bg: Color,
     text: Color,
@@ -129,16 +132,20 @@ impl button::StyleSheet for ButtonStyle {
     }
 }
 
-struct PaneGridStyle(Color);
+/// A style we apply to pane grids.
+struct PaneGridStyle (Color);
 impl pane_grid::StyleSheet for PaneGridStyle {
     fn picked_split(&self) -> Option<pane_grid::Line> {
-        None
+        Some(pane_grid::Line {
+            color: self.0,
+            width: 2.0,
+        })
     }
 
     fn hovered_split(&self) -> Option<pane_grid::Line> {
         Some(pane_grid::Line {
             color: self.0,
-            width: 2.0,
+            width: 1.0,
         })
     }
 }
@@ -149,7 +156,7 @@ mod dark {
     pub const TEXT_SUBTLE: Color = Color::from_rgba(0.0, 0.0, 0.0, 0.6);
     pub const TEXT_PRIMARY: Color = Color::WHITE;
     pub const TEXT_ACCENT: Color =
-        Color::from_rgba(0.10588235294, 0.36862745098, 0.12549019607, 1.0);
+        Color::from_rgba(0.39215686274, 0.86666666666, 0.09019607843, 1.0);
     pub const TEXT_ON_ACCENT: Color = Color::from_rgba(1.0, 1.0, 1.0, 0.5);
     pub const BACKGROUND_PRIMARY: Color =
         Color::from_rgba(0.1294117647, 0.1294117647, 0.1294117647, 1.0);

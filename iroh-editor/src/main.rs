@@ -8,6 +8,7 @@ use message::Message;
 use panes::PaneZone;
 use theme::Theme;
 
+/// The main editor window
 struct App {
     pane_zone: PaneZone,
     theme: Theme,
@@ -39,6 +40,7 @@ impl Sandbox for App {
         }
     }
 }
+
 fn main() {
     App::run(Settings::default()).unwrap();
 }
