@@ -2,6 +2,7 @@ use iced::{Element, Sandbox, Settings};
 
 pub mod message;
 pub mod panes;
+mod style;
 
 use message::Message;
 use panes::PaneZone;

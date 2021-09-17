@@ -70,16 +70,22 @@ impl PaneState {
         let controls = Row::with_children(vec![
             Button::new(&mut self.h_state, Text::new("H"))
                 .on_press(PaneMessage::Split(pane_grid::Axis::Horizontal, pane).into())
+                .style(style::ControlButtons)
                 .into(),
             Button::new(&mut self.v_state, Text::new("V"))
                 .on_press(PaneMessage::Split(pane_grid::Axis::Vertical, pane).into())
+                .style(style::ControlButtons)
                 .into(),
         ]);
-        let title_bar = TitleBar::new(Text::new(self.elem.title())).controls(controls);
+        let title_bar = TitleBar::new(Text::new(self.elem.title()))
+            .controls(controls)
+            .style(style::TitleBarStyle);
 
         let content = self.elem.view(pane);
 
-        pane_grid::Content::new(content).title_bar(title_bar)
+        pane_grid::Content::new(content)
+            .title_bar(title_bar)
+            .style(style::ContentStyle)
     }
 }
 
@@ -97,10 +103,57 @@ impl Default for PaneState {
 pub struct EmptyPane;
 impl Paneable for EmptyPane {
     fn view(&mut self, pane: Pane) -> Element<Message> {
-        Text::new(format!("Hello from pane {:?}", pane)).into()
+        Text::new(format!("Hello from pane {:?}", pane))
+            .color(crate::style::COLOR_TEXT)
+            .size(16)
+            .into()
     }
 
     fn title(&self) -> String {
         "Hello, World!".into()
+    }
+}
+
+mod style {
+    use crate::style::*;
+    use iced::{button, widget::container, Background, Color, Vector};
+
+    pub struct TitleBarStyle;
+    impl container::StyleSheet for TitleBarStyle {
+        fn style(&self) -> container::Style {
+            container::Style {
+                text_color: Some(COLOR_TEXT),
+                background: Some(Background::Color(COLOR_BACKGROUND)),
+                border_radius: 0.0,
+                border_width: 0.0,
+                border_color: Color::TRANSPARENT,
+            }
+        }
+    }
+
+    pub struct ContentStyle;
+    impl container::StyleSheet for ContentStyle {
+        fn style(&self) -> container::Style {
+            container::Style {
+                text_color: Some(COLOR_TEXT),
+                background: Some(Background::Color(COLOR_BACKGROUND)),
+                border_radius: 0.0,
+                border_width: 0.0,
+                border_color: Color::TRANSPARENT,
+            }
+        }
+    }
+    pub struct ControlButtons;
+    impl button::StyleSheet for ControlButtons {
+        fn active(&self) -> button::Style {
+            button::Style {
+                shadow_offset: Vector::new(0.0, 0.0),
+                background: Some(Background::Color(COLOR_TEXT)),
+                border_radius: 0.0,
+                border_width: 0.0,
+                border_color: Color::TRANSPARENT,
+                text_color: COLOR_BACKGROUND,
+            }
+        }
     }
 }
