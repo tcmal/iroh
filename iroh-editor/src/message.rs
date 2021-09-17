@@ -6,6 +6,7 @@ pub enum PaneMessage {
     Split(pane_grid::Axis, pane_grid::Pane),
     Drag(pane_grid::DragEvent),
     Resize(pane_grid::ResizeEvent),
+    Close(pane_grid::Pane),
 }
 
 impl Into<Message> for PaneMessage {

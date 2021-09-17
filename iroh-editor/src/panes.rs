@@ -41,6 +41,13 @@ impl PaneZone {
                 }
                 _ => (),
             },
+            PaneMessage::Close(p) => {
+                if self.panes.len() > 0 {
+                    self.panes.close(&p);
+                } else {
+                    todo!()
+                }
+            }
         }
     }
 }
@@ -63,6 +70,7 @@ pub struct PaneState {
     elem: Box<dyn Paneable>,
     h_state: button::State,
     v_state: button::State,
+    c_state: button::State,
 }
 
 impl PaneState {
@@ -72,6 +80,7 @@ impl PaneState {
             elem,
             h_state: button::State::new(),
             v_state: button::State::new(),
+            c_state: button::State::new(),
         }
     }
 
@@ -80,11 +89,15 @@ impl PaneState {
         let controls = Row::with_children(vec![
             Button::new(&mut self.h_state, Text::new("H"))
                 .on_press(PaneMessage::Split(pane_grid::Axis::Horizontal, pane).into())
-                .style(theme.button_primary())
+                .style(theme.button_subtle())
                 .into(),
             Button::new(&mut self.v_state, Text::new("V"))
                 .on_press(PaneMessage::Split(pane_grid::Axis::Vertical, pane).into())
-                .style(theme.button_primary())
+                .style(theme.button_subtle())
+                .into(),
+            Button::new(&mut self.c_state, Text::new("X"))
+                .on_press(PaneMessage::Close(pane).into())
+                .style(theme.button_subtle())
                 .into(),
         ]);
         let title_bar = TitleBar::new(Text::new(self.elem.title()).color(theme.text_accent()))
@@ -101,11 +114,7 @@ impl PaneState {
 
 impl Default for PaneState {
     fn default() -> Self {
-        PaneState {
-            elem: Box::new(EmptyPane),
-            h_state: button::State::new(),
-            v_state: button::State::new(),
-        }
+        PaneState::new(Box::new(EmptyPane))
     }
 }
 
