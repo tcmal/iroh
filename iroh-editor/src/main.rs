@@ -2,21 +2,25 @@ use iced::{Element, Sandbox, Settings};
 
 pub mod message;
 pub mod panes;
-mod style;
+mod theme;
 
 use message::Message;
 use panes::PaneZone;
+use theme::Theme;
 
 struct App {
     pane_zone: PaneZone,
+    theme: Theme,
 }
 
 impl Sandbox for App {
     type Message = Message;
 
     fn new() -> Self {
-        let pane_zone = PaneZone::default();
-        Self { pane_zone }
+        Self {
+            pane_zone: PaneZone::default(),
+            theme: Theme::default(),
+        }
     }
 
     fn title(&self) -> String {
@@ -24,8 +28,9 @@ impl Sandbox for App {
     }
 
     fn view(&mut self) -> Element<Message> {
-        self.pane_zone.view()
+        self.pane_zone.view(&self.theme)
     }
+
     fn update(&mut self, message: Message) {
         match message {
             Message::PaneMessage(msg) => {

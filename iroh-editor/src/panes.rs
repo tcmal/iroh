@@ -4,7 +4,10 @@ use iced::{
     Button, Element, PaneGrid, Row, Text,
 };
 
-use crate::message::{Message, PaneMessage};
+use crate::{
+    message::{Message, PaneMessage},
+    theme::Theme,
+};
 
 /// A layout with a bunch of varying panes, with all the code to split, rearrange, and resize them.
 pub struct PaneZone {
@@ -12,11 +15,14 @@ pub struct PaneZone {
 }
 
 impl PaneZone {
-    pub fn view(&mut self) -> Element<Message> {
-        PaneGrid::new(&mut self.panes, |pane, content| content.view(pane).into())
-            .on_drag(|e| PaneMessage::Drag(e).into())
-            .on_resize(10, |e| PaneMessage::Resize(e).into())
-            .into()
+    pub fn view(&mut self, theme: &Theme) -> Element<Message> {
+        PaneGrid::new(&mut self.panes, |pane, content| {
+            content.view(pane, theme).into()
+        })
+        .on_drag(|e| PaneMessage::Drag(e).into())
+        .on_resize(10, |e| PaneMessage::Resize(e).into())
+        .style(theme)
+        .into()
     }
     pub fn update(&mut self, msg: PaneMessage) {
         match msg {
@@ -44,7 +50,7 @@ impl Default for PaneZone {
 
 /// Something which can be displayed in a pane
 pub trait Paneable {
-    fn view(&mut self, pane: Pane) -> Element<Message>;
+    fn view(&mut self, pane: Pane, theme: &Theme) -> Element<Message>;
     fn title(&self) -> String;
 }
 
@@ -66,26 +72,26 @@ impl PaneState {
     }
 
     /// Get the contents of the pane
-    fn view(&mut self, pane: Pane) -> pane_grid::Content<Message> {
+    fn view(&mut self, pane: Pane, theme: &Theme) -> pane_grid::Content<Message> {
         let controls = Row::with_children(vec![
             Button::new(&mut self.h_state, Text::new("H"))
                 .on_press(PaneMessage::Split(pane_grid::Axis::Horizontal, pane).into())
-                .style(style::ControlButtons)
+                .style(theme.button_primary())
                 .into(),
             Button::new(&mut self.v_state, Text::new("V"))
                 .on_press(PaneMessage::Split(pane_grid::Axis::Vertical, pane).into())
-                .style(style::ControlButtons)
+                .style(theme.button_primary())
                 .into(),
         ]);
-        let title_bar = TitleBar::new(Text::new(self.elem.title()))
+        let title_bar = TitleBar::new(Text::new(self.elem.title()).color(theme.text_accent()))
             .controls(controls)
-            .style(style::TitleBarStyle);
+            .style(theme.container_primary());
 
-        let content = self.elem.view(pane);
+        let content = self.elem.view(pane, theme);
 
         pane_grid::Content::new(content)
             .title_bar(title_bar)
-            .style(style::ContentStyle)
+            .style(theme.container_primary())
     }
 }
 
@@ -102,58 +108,14 @@ impl Default for PaneState {
 /// An empty pane, that just says hello. This is the default for any new split.
 pub struct EmptyPane;
 impl Paneable for EmptyPane {
-    fn view(&mut self, pane: Pane) -> Element<Message> {
+    fn view(&mut self, pane: Pane, theme: &Theme) -> Element<Message> {
         Text::new(format!("Hello from pane {:?}", pane))
-            .color(crate::style::COLOR_TEXT)
+            .color(theme.text_primary())
             .size(16)
             .into()
     }
 
     fn title(&self) -> String {
         "Hello, World!".into()
-    }
-}
-
-mod style {
-    use crate::style::*;
-    use iced::{button, widget::container, Background, Color, Vector};
-
-    pub struct TitleBarStyle;
-    impl container::StyleSheet for TitleBarStyle {
-        fn style(&self) -> container::Style {
-            container::Style {
-                text_color: Some(COLOR_TEXT),
-                background: Some(Background::Color(COLOR_BACKGROUND)),
-                border_radius: 0.0,
-                border_width: 0.0,
-                border_color: Color::TRANSPARENT,
-            }
-        }
-    }
-
-    pub struct ContentStyle;
-    impl container::StyleSheet for ContentStyle {
-        fn style(&self) -> container::Style {
-            container::Style {
-                text_color: Some(COLOR_TEXT),
-                background: Some(Background::Color(COLOR_BACKGROUND)),
-                border_radius: 0.0,
-                border_width: 0.0,
-                border_color: Color::TRANSPARENT,
-            }
-        }
-    }
-    pub struct ControlButtons;
-    impl button::StyleSheet for ControlButtons {
-        fn active(&self) -> button::Style {
-            button::Style {
-                shadow_offset: Vector::new(0.0, 0.0),
-                background: Some(Background::Color(COLOR_TEXT)),
-                border_radius: 0.0,
-                border_width: 0.0,
-                border_color: Color::TRANSPARENT,
-                text_color: COLOR_BACKGROUND,
-            }
-        }
     }
 }
