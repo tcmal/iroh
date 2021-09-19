@@ -1,17 +1,17 @@
 use iced::{
     button,
     pane_grid::{self, Pane, TitleBar},
-    Button, Element, PaneGrid, Row, Text,
+    Button, Column, Element, PaneGrid, Row, Text,
 };
 
 use crate::{
-    message::{Message, PaneMessage},
-    theme::Theme,
+    app::AppState,
+    message::{Message, NewPane, PaneMessage},
 };
 
 /// Something which can be displayed in a pane
 pub trait Paneable {
-    fn view(&mut self, pane: Pane, theme: &Theme) -> Element<Message>;
+    fn view(&mut self, pane: Pane, app_state: &AppState) -> Element<Message>;
     fn title(&self) -> String;
 }
 
@@ -21,22 +21,31 @@ pub struct PaneZone {
 }
 
 impl PaneZone {
+    pub fn new(app_state: &AppState) -> Self {
+        let (panes, _) = pane_grid::State::new(PaneState::new(Box::new(EmptyPane::new(app_state))));
+        Self { panes }
+    }
+
     /// Get what to currently render
-    pub fn view(&mut self, theme: &Theme) -> Element<Message> {
+    pub fn view(&mut self, app_state: &AppState) -> Element<Message> {
         PaneGrid::new(&mut self.panes, |pane, content| {
-            content.view(pane, theme).into()
+            content.view(pane, app_state).into()
         })
         .on_drag(|e| PaneMessage::Drag(e).into())
         .on_resize(10, |e| PaneMessage::Resize(e).into())
-        .style(theme)
+        .style(app_state.theme())
         .into()
     }
 
     /// Process the given message
-    pub fn update(&mut self, msg: PaneMessage) {
+    pub fn update(&mut self, app_state: &mut AppState, msg: PaneMessage) {
         match msg {
             PaneMessage::Split(axis, pane) => {
-                self.panes.split(axis, &pane, PaneState::default());
+                self.panes.split(
+                    axis,
+                    &pane,
+                    PaneState::new(Box::new(EmptyPane::new(app_state))),
+                );
             }
             PaneMessage::Resize(e) => {
                 self.panes.resize(&e.split, e.ratio);
@@ -54,14 +63,16 @@ impl PaneZone {
                     todo!()
                 }
             }
+            PaneMessage::Set(p, new) => {
+                if let Some(dst) = self.panes.get_mut(&p) {
+                    *dst = match new {
+                        NewPane::FromSchema(i) => {
+                            PaneState::new(app_state.schema().create_pane(i).unwrap())
+                        }
+                    };
+                }
+            }
         }
-    }
-}
-
-impl Default for PaneZone {
-    fn default() -> Self {
-        let (panes, _) = pane_grid::State::new(PaneState::default());
-        Self { panes }
     }
 }
 
@@ -85,47 +96,59 @@ impl PaneState {
     }
 
     /// Get the contents of the pane
-    fn view(&mut self, pane: Pane, theme: &Theme) -> pane_grid::Content<Message> {
+    fn view(&mut self, pane: Pane, app_state: &AppState) -> pane_grid::Content<Message> {
         let controls = Row::with_children(vec![
             Button::new(&mut self.h_state, Text::new("H"))
                 .on_press(PaneMessage::Split(pane_grid::Axis::Horizontal, pane).into())
-                .style(theme.button_subtle())
+                .style(app_state.theme().button_subtle())
                 .into(),
             Button::new(&mut self.v_state, Text::new("V"))
                 .on_press(PaneMessage::Split(pane_grid::Axis::Vertical, pane).into())
-                .style(theme.button_subtle())
+                .style(app_state.theme().button_subtle())
                 .into(),
             Button::new(&mut self.c_state, Text::new("X"))
                 .on_press(PaneMessage::Close(pane).into())
-                .style(theme.button_subtle())
+                .style(app_state.theme().button_subtle())
                 .into(),
         ]);
-        let title_bar = TitleBar::new(Text::new(self.elem.title()).color(theme.text_accent()))
-            .controls(controls)
-            .style(theme.container_primary());
+        let title_bar =
+            TitleBar::new(Text::new(self.elem.title()).color(app_state.theme().text_accent()))
+                .controls(controls)
+                .style(app_state.theme().container_primary());
 
-        let content = self.elem.view(pane, theme);
+        let content = self.elem.view(pane, app_state);
 
         pane_grid::Content::new(content)
             .title_bar(title_bar)
-            .style(theme.container_primary())
+            .style(app_state.theme().container_primary())
     }
 }
 
-impl Default for PaneState {
-    fn default() -> Self {
-        PaneState::new(Box::new(EmptyPane))
+/// An empty pane, which provides buttons to swap it out for any other pane.
+pub struct EmptyPane {
+    names: Vec<String>,
+    states: Vec<button::State>,
+}
+impl EmptyPane {
+    pub fn new(app_state: &AppState) -> Self {
+        let names = app_state.schema().pane_names().to_vec();
+        let states = vec![button::State::default(); names.len()];
+
+        Self { names, states }
     }
 }
-
-/// An empty pane, that just says hello. This is the default for any new split.
-pub struct EmptyPane;
 impl Paneable for EmptyPane {
-    fn view(&mut self, pane: Pane, theme: &Theme) -> Element<Message> {
-        Text::new(format!("Hello from pane {:?}", pane))
-            .color(theme.text_primary())
-            .size(16)
-            .into()
+    fn view(&mut self, pane: Pane, app_state: &AppState) -> Element<Message> {
+        let mut col = Column::new().padding(10).spacing(10);
+        for (i, (name, state)) in self.names.iter().zip(self.states.iter_mut()).enumerate() {
+            let btn = Button::new(state, Text::new(name))
+                .style(app_state.theme().button_primary())
+                .on_press(PaneMessage::Set(pane, NewPane::FromSchema(i)).into());
+
+            col = col.push(btn);
+        }
+
+        col.into()
     }
 
     fn title(&self) -> String {

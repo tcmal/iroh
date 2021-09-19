@@ -7,6 +7,12 @@ pub enum PaneMessage {
     Drag(pane_grid::DragEvent),
     Resize(pane_grid::ResizeEvent),
     Close(pane_grid::Pane),
+    Set(pane_grid::Pane, NewPane),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum NewPane {
+    FromSchema(usize),
 }
 
 impl Into<Message> for PaneMessage {

@@ -1,11 +1,11 @@
 use iced::{pane_grid::Pane, Element, Text};
-use iroh_editor::{ffi::AddonPanes, message::Message, panes::Paneable, theme::Theme};
+use iroh_editor::{app::AppState, ffi::AddonPanes, message::Message, panes::Paneable};
 
 pub struct RectWidget;
 impl Paneable for RectWidget {
-    fn view(&mut self, pane: Pane, theme: &Theme) -> Element<Message> {
+    fn view(&mut self, _pane: Pane, app_state: &AppState) -> Element<Message> {
         Text::new("Hello from RectWidget!")
-            .color(theme.text_accent())
+            .color(app_state.theme().text_accent())
             .into()
     }
 
@@ -16,9 +16,9 @@ impl Paneable for RectWidget {
 
 pub struct CircleWidget;
 impl Paneable for CircleWidget {
-    fn view(&mut self, pane: Pane, theme: &Theme) -> Element<Message> {
+    fn view(&mut self, _pane: Pane, app_state: &AppState) -> Element<Message> {
         Text::new("Hello from CircleWidget!")
-            .color(theme.text_accent())
+            .color(app_state.theme().text_accent())
             .into()
     }
 
