@@ -9,6 +9,12 @@ use crate::{
     theme::Theme,
 };
 
+/// Something which can be displayed in a pane
+pub trait Paneable {
+    fn view(&mut self, pane: Pane, theme: &Theme) -> Element<Message>;
+    fn title(&self) -> String;
+}
+
 /// A layout with a bunch of varying panes, with all the code to split, rearrange, and resize them.
 pub struct PaneZone {
     panes: pane_grid::State<PaneState>,
@@ -57,12 +63,6 @@ impl Default for PaneZone {
         let (panes, _) = pane_grid::State::new(PaneState::default());
         Self { panes }
     }
-}
-
-/// Something which can be displayed in a pane
-pub trait Paneable {
-    fn view(&mut self, pane: Pane, theme: &Theme) -> Element<Message>;
-    fn title(&self) -> String;
 }
 
 /// Wrapper for pane and split controls

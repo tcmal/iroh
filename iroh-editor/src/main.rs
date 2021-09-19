@@ -1,9 +1,11 @@
 use iced::{Element, Sandbox, Settings};
 
+pub mod ffi;
 pub mod message;
 pub mod panes;
 mod theme;
 
+use ffi::Schema;
 use message::Message;
 use panes::PaneZone;
 use theme::Theme;
@@ -42,5 +44,9 @@ impl Sandbox for App {
 }
 
 fn main() {
+    let path = &std::env::args().collect::<Vec<_>>()[1];
+    let schema = Schema::new(path).unwrap();
+    println!("{:?}", schema);
+
     App::run(Settings::default()).unwrap();
 }
