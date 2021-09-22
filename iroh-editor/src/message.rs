@@ -10,9 +10,11 @@ pub enum PaneMessage {
     Set(pane_grid::Pane, NewPane),
 }
 
+/// Which pane to open
 #[derive(Debug, Clone, Copy)]
 pub enum NewPane {
-    FromSchema(usize),
+    Outline,
+    Inspector,
 }
 
 impl Into<Message> for PaneMessage {

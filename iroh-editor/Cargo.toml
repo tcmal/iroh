@@ -7,3 +7,4 @@ edition = "2018"
 iced = "0.3"
 libloading = "0.7.0"
 anyhow = "1.0.44"
+iroh = { path = "../iroh" }

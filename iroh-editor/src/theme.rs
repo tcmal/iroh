@@ -133,7 +133,7 @@ impl button::StyleSheet for ButtonStyle {
 }
 
 /// A style we apply to pane grids.
-struct PaneGridStyle (Color);
+struct PaneGridStyle(Color);
 impl pane_grid::StyleSheet for PaneGridStyle {
     fn picked_split(&self) -> Option<pane_grid::Line> {
         Some(pane_grid::Line {
