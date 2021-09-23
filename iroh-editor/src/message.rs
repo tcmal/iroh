@@ -1,4 +1,5 @@
 use iced::pane_grid;
+use iroh::Key;
 
 /// A message related to a pane zone.
 #[derive(Debug, Clone, Copy)]
@@ -17,14 +18,15 @@ pub enum NewPane {
     Inspector,
 }
 
-impl Into<Message> for PaneMessage {
-    fn into(self) -> Message {
+impl<K: Key> Into<Message<K>> for PaneMessage {
+    fn into(self) -> Message<K> {
         Message::PaneMessage(self)
     }
 }
 
 /// Root message type for our app.
 #[derive(Debug, Clone, Copy)]
-pub enum Message {
+pub enum Message<K: Key> {
     PaneMessage(PaneMessage),
+    Select(K),
 }

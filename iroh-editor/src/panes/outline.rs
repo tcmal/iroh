@@ -1,22 +1,34 @@
-use iced::{scrollable, Align, Column, Row, Scrollable};
-use iroh::Kind;
-
-use crate::pane_zone::Paneable;
+use crate::{app::AppState, message::Message, pane_zone::Paneable};
+use iced::{
+    button, pane_grid::Pane, scrollable, Align, Button, Column, Element, Length, Row, Scrollable,
+    Text,
+};
+use iroh::{Kind, ObjectContainer};
 
 pub struct OutlinePane {
     scrollable_state: scrollable::State,
+    states: Vec<button::State>,
 }
 
-impl<K: Kind> Paneable<K> for OutlinePane {
-    fn view<C>(
-        &mut self,
-        pane: iced::pane_grid::Pane,
-        app_state: &crate::app::AppState<K, C>,
-    ) -> iced::Element<crate::message::Message<K>> {
-        let controls = Row::with_children(vec![]).align_items(Align::End).into();
-        let list = Scrollable::new(&mut self.scrollable_state).into();
+impl<K: Kind, C: ObjectContainer<K>> Paneable<K, C> for OutlinePane {
+    fn view(&mut self, _pane: Pane, app_state: &AppState<K, C>) -> Element<Message<K::Key>> {
+        let controls = Row::with_children(vec![]).align_items(Align::End);
+        let mut list = Scrollable::new(&mut self.scrollable_state);
 
-        Column::with_children(vec![controls, list]).into()
+        while self.states.len() < app_state.container().count() {
+            self.states.push(button::State::default());
+        }
+
+        for (v, s) in app_state.container().all().zip(self.states.iter_mut()) {
+            list = list.push(
+                Button::new(s, Text::new(format!("{:?}", v.key())))
+                    .on_press(Message::Select(v.key()))
+                    .style(app_state.theme().button_subtle())
+                    .width(Length::Fill),
+            );
+        }
+
+        Column::with_children(vec![controls.into(), list.into()]).into()
     }
 
     fn title(&self) -> String {
@@ -28,6 +40,7 @@ impl Default for OutlinePane {
     fn default() -> Self {
         Self {
             scrollable_state: scrollable::State::default(),
+            states: vec![],
         }
     }
 }

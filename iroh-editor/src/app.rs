@@ -1,10 +1,9 @@
 use crate::{message::Message, pane_zone::PaneZone, theme::Theme};
 use iced::{Element, Sandbox};
 use iroh::{Kind, ObjectContainer};
-use std::marker::PhantomData;
 
 /// State of our actual editor.
-pub struct AppState<'a, K: 'a + Kind, C: ObjectContainer<'a, K>> {
+pub struct AppState<K: Kind, C: ObjectContainer<K>> {
     /// Currently selected object
     selected: Option<K::Key>,
 
@@ -13,34 +12,60 @@ pub struct AppState<'a, K: 'a + Kind, C: ObjectContainer<'a, K>> {
 
     /// Appearance settings
     theme: Theme,
-    _d: PhantomData<&'a C>,
 }
 
-impl<'a, K: Kind, C: ObjectContainer<'a, K>> AppState<'a, K, C> {
+impl<K: Kind, C: ObjectContainer<K>> AppState<K, C> {
     /// Get a reference to the app's theme.
     pub fn theme(&self) -> &Theme {
         &self.theme
     }
+
+    /// Set the new selected object, if it exists. Otherwise, selection is cleared.
+    pub fn select(&mut self, selected: Option<K::Key>) {
+        self.selected = match selected {
+            Some(x) => match self.container.exists(x) {
+                true => Some(x),
+                false => None,
+            },
+            None => None,
+        }
+    }
+
+    /// Get the currently selected key
+    pub fn selected_key(&self) -> Option<K::Key> {
+        self.selected
+    }
+
+    pub fn is_selected(&self, key: K::Key) -> bool {
+        match self.selected {
+            Some(x) => x == key,
+            None => false,
+        }
+    }
+
+    /// Get a reference to the object container.
+    pub fn container(&self) -> &C {
+        &self.container
+    }
 }
 
 /// The main editor window
-pub struct App<'a, K: Kind, C: ObjectContainer<'a, K>> {
+pub struct App<K: Kind, C: ObjectContainer<K>> {
     /// Stores state for splitting & moving around panes
-    pane_zone: PaneZone<'a, K, C>,
+    pane_zone: PaneZone<K, C>,
 
     /// Stores our actual application state
-    app_state: AppState<'a, K, C>,
+    app_state: AppState<K, C>,
 }
 
-impl<'a, K: Kind, F: ObjectContainer<'a, K>> Sandbox for App<'a, K, F> {
-    type Message = Message;
+impl<K: Kind, C: ObjectContainer<K>> Sandbox for App<K, C> {
+    type Message = Message<K::Key>;
 
     fn new() -> Self {
         let app_state = AppState {
             selected: None,
             theme: Theme::default(),
-            container: F::empty(),
-            _d: PhantomData,
+            container: C::empty(),
         };
         Self {
             pane_zone: PaneZone::new(&app_state),

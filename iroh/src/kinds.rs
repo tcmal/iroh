@@ -2,12 +2,12 @@
 use crate::fields::Field;
 use std::fmt::Debug;
 
-pub trait Kind: Clone + Debug {
+pub trait Kind: 'static + Clone + Debug {
     type Key: Key;
     type Field: Field;
 
     fn key(&self) -> Self::Key;
 }
 
-pub trait Key: Copy + Clone + Debug + Send + Sync {}
-impl<T> Key for T where T: Copy + Clone + Debug + Send + Sync {}
+pub trait Key: 'static + Copy + Clone + Debug + Send + Sync + PartialEq {}
+impl<T> Key for T where T: 'static + Copy + Clone + Debug + Send + Sync + PartialEq {}
