@@ -6,3 +6,4 @@ pub mod panes;
 pub mod theme;
 
 pub use app::App;
+pub use iced::{Sandbox, Settings};

@@ -1,14 +1,7 @@
-use iced::{Sandbox, Settings};
-use iroh::{containers::VecContainer, Field, Kind};
-use iroh_editor::App;
+use iroh::{containers::VecContainer, Kind};
+use iroh_editor::*;
 
-pub struct RectWidthField;
-impl Field for RectWidthField {
-    fn new() -> Self {
-        Self
-    }
-}
-
+/// Example kind
 #[derive(Clone, Debug)]
 pub struct Rect {
     id: usize,
@@ -18,7 +11,6 @@ pub struct Rect {
 
 impl Kind for Rect {
     type Key = usize;
-    type Field = RectWidthField;
 
     fn key(&self) -> Self::Key {
         self.id
@@ -32,15 +24,6 @@ impl Kind for Rect {
         }
     }
 }
-
-// pub struct Circle {
-//     radius: f32,
-// }
-// impl Kind for Circle {
-//     fn kind_desc() -> KindDesc {
-//         KindDesc {}
-//     }
-// }
 
 fn main() {
     App::<Rect, VecContainer<_>>::run(Settings::default()).unwrap();

@@ -1,10 +1,8 @@
 //! Traits and structs related to the representation of kinds.
-use crate::fields::Field;
 use std::fmt::Debug;
 
 pub trait Kind: 'static + Clone + Debug {
     type Key: Key;
-    type Field: Field;
 
     fn key(&self) -> Self::Key;
     fn default_with_key(key: Self::Key) -> Self;
