@@ -29,4 +29,5 @@ impl<K: Key> Into<Message<K>> for PaneMessage {
 pub enum Message<K: Key> {
     PaneMessage(PaneMessage),
     Select(K),
+    NewObject,
 }

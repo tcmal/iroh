@@ -15,12 +15,21 @@ pub struct Rect {
     width: f32,
     height: f32,
 }
+
 impl Kind for Rect {
     type Key = usize;
     type Field = RectWidthField;
 
     fn key(&self) -> Self::Key {
         self.id
+    }
+
+    fn default_with_key(key: Self::Key) -> Self {
+        Self {
+            id: key,
+            width: 1.0,
+            height: 1.0,
+        }
     }
 }
 

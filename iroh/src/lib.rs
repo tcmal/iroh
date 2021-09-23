@@ -13,5 +13,6 @@ pub trait ObjectContainer<K: 'static + Kind> {
     fn all<'a>(&'a self) -> Self::AllIter<'a>;
     fn exists(&self, key: K::Key) -> bool;
     fn count(&self) -> usize;
+    fn new(&mut self) -> K::Key;
     fn empty() -> Self;
 }

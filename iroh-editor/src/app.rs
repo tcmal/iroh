@@ -47,6 +47,11 @@ impl<K: Kind, C: ObjectContainer<K>> AppState<K, C> {
     pub fn container(&self) -> &C {
         &self.container
     }
+
+    /// Get a mutable reference to the object container.
+    pub fn container_mut(&mut self) -> &mut C {
+        &mut self.container
+    }
 }
 
 /// The main editor window
@@ -86,7 +91,11 @@ impl<K: Kind, C: ObjectContainer<K>> Sandbox for App<K, C> {
             Message::PaneMessage(msg) => {
                 self.pane_zone.update(&mut self.app_state, msg);
             }
-            _ => todo!(),
+            Message::Select(x) => self.app_state.select(Some(x)),
+            Message::NewObject => {
+                let k = self.app_state.container_mut().new();
+                self.app_state.select(Some(k));
+            }
         }
     }
 }

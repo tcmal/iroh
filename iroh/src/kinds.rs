@@ -7,6 +7,7 @@ pub trait Kind: 'static + Clone + Debug {
     type Field: Field;
 
     fn key(&self) -> Self::Key;
+    fn default_with_key(key: Self::Key) -> Self;
 }
 
 pub trait Key: 'static + Copy + Clone + Debug + Send + Sync + PartialEq {}
