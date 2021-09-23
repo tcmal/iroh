@@ -12,7 +12,7 @@ pub struct OutlinePane {
 }
 
 impl<K: Kind, C: ObjectContainer<K>> Paneable<K, C> for OutlinePane {
-    fn view(&mut self, _pane: Pane, app_state: &AppState<K, C>) -> Element<Message<K::Key>> {
+    fn view(&mut self, _pane: Pane, app_state: &AppState<K, C>) -> Element<Message<K>> {
         let controls = Row::with_children(vec![Button::new(&mut self.new_state, Text::new("+"))
             .on_press(Message::NewObject)
             .style(app_state.theme().button_primary())

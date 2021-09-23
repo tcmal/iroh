@@ -1,5 +1,6 @@
 pub mod app;
 pub mod message;
+pub mod mutation;
 pub mod pane_zone;
 pub mod panes;
 pub mod theme;

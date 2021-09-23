@@ -12,7 +12,7 @@ use iroh::{Kind, ObjectContainer};
 
 /// Something which can be displayed in a pane
 pub trait Paneable<K: Kind, C: ObjectContainer<K>> {
-    fn view(&mut self, pane: Pane, app_state: &AppState<K, C>) -> Element<Message<K::Key>>;
+    fn view(&mut self, pane: Pane, app_state: &AppState<K, C>) -> Element<Message<K>>;
     fn title(&self) -> String;
 }
 
@@ -29,7 +29,7 @@ impl<K: Kind, C: ObjectContainer<K>> PaneZone<K, C> {
     }
 
     /// Get what to currently render
-    pub fn view<'b>(&'b mut self, app_state: &AppState<K, C>) -> Element<'b, Message<K::Key>> {
+    pub fn view<'b>(&'b mut self, app_state: &AppState<K, C>) -> Element<'b, Message<K>> {
         PaneGrid::new(&mut self.panes, |pane, content| {
             content.view(pane, app_state).into()
         })
@@ -97,11 +97,7 @@ impl<'a, K: Kind, C: ObjectContainer<K>> PaneState<K, C> {
     }
 
     /// Get the contents of the pane
-    fn view(
-        &mut self,
-        pane: Pane,
-        app_state: &AppState<K, C>,
-    ) -> pane_grid::Content<Message<K::Key>> {
+    fn view(&mut self, pane: Pane, app_state: &AppState<K, C>) -> pane_grid::Content<Message<K>> {
         // Row of buttons
         let controls = Row::with_children(vec![
             Button::new(&mut self.h_state, Text::new("H"))

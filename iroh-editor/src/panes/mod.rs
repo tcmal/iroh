@@ -21,7 +21,7 @@ impl EmptyPane {
     }
 }
 impl<K: Kind, C: ObjectContainer<K>> Paneable<K, C> for EmptyPane {
-    fn view(&mut self, pane: Pane, app_state: &AppState<K, C>) -> Element<Message<K::Key>> {
+    fn view(&mut self, pane: Pane, app_state: &AppState<K, C>) -> Element<Message<K>> {
         let col = Column::new().padding(10).spacing(10).push(
             Button::new(&mut self.outline_state, Text::new("Outline"))
                 .style(app_state.theme().button_primary())

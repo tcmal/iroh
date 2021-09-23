@@ -64,7 +64,7 @@ pub struct App<K: Kind, C: ObjectContainer<K>> {
 }
 
 impl<K: Kind, C: ObjectContainer<K>> Sandbox for App<K, C> {
-    type Message = Message<K::Key>;
+    type Message = Message<K>;
 
     fn new() -> Self {
         let app_state = AppState {
@@ -96,6 +96,7 @@ impl<K: Kind, C: ObjectContainer<K>> Sandbox for App<K, C> {
                 let k = self.app_state.container_mut().new();
                 self.app_state.select(Some(k));
             }
+            Message::Mutate(_) => todo!(),
         }
     }
 }

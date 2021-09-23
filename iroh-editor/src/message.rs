@@ -1,5 +1,7 @@
 use iced::pane_grid;
-use iroh::Key;
+use iroh::Kind;
+
+use crate::mutation::Mutator;
 
 /// A message related to a pane zone.
 #[derive(Debug, Clone, Copy)]
@@ -18,16 +20,17 @@ pub enum NewPane {
     Inspector,
 }
 
-impl<K: Key> Into<Message<K>> for PaneMessage {
+impl<K: Kind> Into<Message<K>> for PaneMessage {
     fn into(self) -> Message<K> {
         Message::PaneMessage(self)
     }
 }
 
 /// Root message type for our app.
-#[derive(Debug, Clone, Copy)]
-pub enum Message<K: Key> {
+#[derive(Debug, Clone)]
+pub enum Message<K: Kind> {
     PaneMessage(PaneMessage),
-    Select(K),
+    Select(K::Key),
     NewObject,
+    Mutate(Box<dyn Mutator<K>>),
 }
