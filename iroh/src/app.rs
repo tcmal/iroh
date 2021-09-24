@@ -116,9 +116,7 @@ impl<K: Kind, C: ObjectStore<K>> Sandbox for App<K, C> {
             Message::NewObject => self.app_state.new(),
             Message::Mutate(m) => {
                 if let Some(o) = self.app_state.selected_mut() {
-                    println!("{:?} {:?}", m, o);
                     m.apply(o);
-                    println!("{:?}", o)
                 }
             }
         }
