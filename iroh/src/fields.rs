@@ -1,5 +1,4 @@
 //! Traits and structs related to the representation of fields.
-
 pub trait Field {
     fn new() -> Self;
 }

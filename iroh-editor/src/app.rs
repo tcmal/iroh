@@ -1,4 +1,4 @@
-use crate::{message::Message, pane_zone::PaneZone, theme::Theme};
+use crate::{message::Message, pane_zone::PaneZone, panes::FieldWidget, theme::Theme};
 use iced::{Element, Sandbox};
 use iroh::{Kind, ObjectContainer};
 
@@ -31,6 +31,10 @@ impl<K: Kind, C: ObjectContainer<K>> AppState<K, C> {
         }
     }
 
+    pub fn selected(&self) -> Option<&K> {
+        self.selected.and_then(|x| self.container.get(x))
+    }
+
     /// Get the currently selected key
     pub fn selected_key(&self) -> Option<K::Key> {
         self.selected
@@ -55,15 +59,15 @@ impl<K: Kind, C: ObjectContainer<K>> AppState<K, C> {
 }
 
 /// The main editor window
-pub struct App<K: Kind, C: ObjectContainer<K>> {
+pub struct App<K: Kind, C: ObjectContainer<K>, F: FieldWidget<K>> {
     /// Stores state for splitting & moving around panes
-    pane_zone: PaneZone<K, C>,
+    pane_zone: PaneZone<K, C, F>,
 
     /// Stores our actual application state
     app_state: AppState<K, C>,
 }
 
-impl<K: Kind, C: ObjectContainer<K>> Sandbox for App<K, C> {
+impl<K: Kind, C: ObjectContainer<K>, F: 'static + FieldWidget<K>> Sandbox for App<K, C, F> {
     type Message = Message<K>;
 
     fn new() -> Self {

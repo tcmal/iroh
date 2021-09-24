@@ -1,5 +1,6 @@
+use iced::{Element, Text};
 use iroh::{containers::VecContainer, Kind};
-use iroh_editor::*;
+use iroh_editor::{message::Message, panes::FieldWidget, *};
 
 /// Example kind
 #[derive(Clone, Debug)]
@@ -25,6 +26,18 @@ impl Kind for Rect {
     }
 }
 
+struct RectFieldWidget;
+impl Default for RectFieldWidget {
+    fn default() -> Self {
+        Self {}
+    }
+}
+impl FieldWidget<Rect> for RectFieldWidget {
+    fn view(&mut self, val: &Rect) -> Vec<Element<Message<Rect>>> {
+        vec![Text::new(format!("{:?}", val)).into()]
+    }
+}
+
 fn main() {
-    App::<Rect, VecContainer<_>>::run(Settings::default()).unwrap();
+    App::<Rect, VecContainer<_>, RectFieldWidget>::run(Settings::default()).unwrap();
 }

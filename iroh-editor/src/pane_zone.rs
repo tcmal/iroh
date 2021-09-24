@@ -1,7 +1,9 @@
+use std::marker::PhantomData;
+
 use crate::{
     app::AppState,
     message::{Message, NewPane, PaneMessage},
-    panes::{EmptyPane, OutlinePane},
+    panes::{inspector::InspectorPane, EmptyPane, FieldWidget, OutlinePane},
 };
 use iced::{
     button,
@@ -17,15 +19,19 @@ pub trait Paneable<K: Kind, C: ObjectContainer<K>> {
 }
 
 /// A layout with a bunch of varying panes, with all the code to split, rearrange, and resize them.
-pub struct PaneZone<K: Kind, C: ObjectContainer<K>> {
+pub struct PaneZone<K: Kind, C: ObjectContainer<K>, F: FieldWidget<K>> {
     panes: pane_grid::State<PaneState<K, C>>,
+    _d: PhantomData<F>,
 }
 
-impl<K: Kind, C: ObjectContainer<K>> PaneZone<K, C> {
+impl<K: Kind, C: ObjectContainer<K>, F: 'static + FieldWidget<K>> PaneZone<K, C, F> {
     /// Create a new pane zone with one [`EmptyPane`]
     pub fn new(app_state: &AppState<K, C>) -> Self {
         let (panes, _) = pane_grid::State::new(PaneState::new(Box::new(EmptyPane::new(app_state))));
-        Self { panes }
+        Self {
+            panes,
+            _d: PhantomData,
+        }
     }
 
     /// Get what to currently render
@@ -69,7 +75,9 @@ impl<K: Kind, C: ObjectContainer<K>> PaneZone<K, C> {
                 if let Some(dst) = self.panes.get_mut(&p) {
                     *dst = match new {
                         NewPane::Outline => PaneState::new(Box::new(OutlinePane::default())),
-                        _ => todo!(),
+                        NewPane::Inspector => {
+                            PaneState::new(Box::new(InspectorPane::<_, F>::default()))
+                        }
                     };
                 }
             }

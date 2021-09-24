@@ -14,5 +14,6 @@ pub trait ObjectContainer<K: 'static + Kind> {
     type AllIter<'a>: Iterator<Item = &'a K>;
     fn all<'a>(&'a self) -> Self::AllIter<'a>;
     fn exists(&self, key: K::Key) -> bool;
+    fn get(&self, key: K::Key) -> Option<&K>;
     fn count(&self) -> usize;
 }

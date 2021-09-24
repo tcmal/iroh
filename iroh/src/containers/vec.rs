@@ -26,4 +26,8 @@ impl<K: Kind<Key = usize>> ObjectContainer<K> for VecContainer<K> {
 
         key
     }
+
+    fn get(&self, key: K::Key) -> Option<&K> {
+        self.0.iter().find(|x| x.key() == key)
+    }
 }
