@@ -1,8 +1,6 @@
 //! For when you want to actually run the editor
 
-use crate::{
-    message::Message, pane_zone::PaneZone, panes::FieldWidget, theme::Theme, Kind, ObjectStore,
-};
+use crate::{message::Message, pane_zone::PaneZone, theme::Theme, Kind, ObjectStore};
 use iced::{Element, Sandbox};
 
 /// State of our actual editor.
@@ -34,8 +32,14 @@ impl<K: Kind, C: ObjectStore<K>> AppState<K, C> {
         }
     }
 
+    /// Get a reference to the currently selected object
     pub fn selected(&self) -> Option<&K> {
         self.selected.and_then(|x| self.container.get(x))
+    }
+
+    /// Get a mutable reference to the currently selected object
+    pub fn selected_mut(&mut self) -> Option<&mut K> {
+        self.selected.and_then(move |x| self.container.get_mut(x))
     }
 
     /// Get the currently selected key
@@ -62,15 +66,15 @@ impl<K: Kind, C: ObjectStore<K>> AppState<K, C> {
 }
 
 /// The main editor window
-pub struct App<K: Kind, C: ObjectStore<K>, F: FieldWidget<K>> {
+pub struct App<K: Kind, C: ObjectStore<K>> {
     /// Stores state for splitting & moving around panes
-    pane_zone: PaneZone<K, C, F>,
+    pane_zone: PaneZone<K, C>,
 
     /// Stores our actual application state
     app_state: AppState<K, C>,
 }
 
-impl<K: Kind, C: ObjectStore<K>, F: 'static + FieldWidget<K>> Sandbox for App<K, C, F> {
+impl<K: Kind, C: ObjectStore<K>> Sandbox for App<K, C> {
     type Message = Message<K>;
 
     fn new() -> Self {
@@ -95,6 +99,7 @@ impl<K: Kind, C: ObjectStore<K>, F: 'static + FieldWidget<K>> Sandbox for App<K,
 
     fn update(&mut self, message: Self::Message) {
         match message {
+            Message::Nop => (),
             Message::PaneMessage(msg) => {
                 self.pane_zone.update(&mut self.app_state, msg);
             }
@@ -103,7 +108,13 @@ impl<K: Kind, C: ObjectStore<K>, F: 'static + FieldWidget<K>> Sandbox for App<K,
                 let k = self.app_state.container_mut().new();
                 self.app_state.select(Some(k));
             }
-            Message::Mutate(_) => todo!(),
+            Message::Mutate(m) => {
+                if let Some(o) = self.app_state.selected_mut() {
+                    println!("{:?} {:?}", m, o);
+                    m.apply(o);
+                    println!("{:?}", o)
+                }
+            }
         }
     }
 }

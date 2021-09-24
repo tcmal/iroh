@@ -14,5 +14,6 @@ pub trait ObjectStore<K: 'static + Kind> {
     fn all<'a>(&'a self) -> Self::AllIter<'a>;
     fn exists(&self, key: K::Key) -> bool;
     fn get(&self, key: K::Key) -> Option<&K>;
+    fn get_mut(&mut self, key: K::Key) -> Option<&mut K>;
     fn count(&self) -> usize;
 }

@@ -2,7 +2,6 @@ pub mod inspector;
 pub mod outline;
 
 pub use crate::pane_zone::Paneable;
-pub use inspector::FieldWidget;
 pub use outline::OutlinePane;
 
 use crate::{

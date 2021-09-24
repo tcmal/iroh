@@ -30,4 +30,8 @@ impl<K: Kind<Key = usize>> ObjectStore<K> for VecContainer<K> {
     fn get(&self, key: K::Key) -> Option<&K> {
         self.0.iter().find(|x| x.key() == key)
     }
+
+    fn get_mut(&mut self, key: K::Key) -> Option<&mut K> {
+        self.0.iter_mut().find(|x| x.key() == key)
+    }
 }

@@ -13,6 +13,5 @@ pub use app::App;
 pub use iced::{Sandbox, Settings};
 pub use kinds::{Field, Key, Kind};
 pub use message::Message;
-pub use panes::FieldWidget;
 pub use stores::ObjectStore;
 pub use theme::Theme;

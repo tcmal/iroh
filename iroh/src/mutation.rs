@@ -6,7 +6,7 @@ use std::{fmt::Debug, marker::PhantomData};
 /// Describes a mutation that should be applied to an object
 pub trait Mutator<T>: Debug + Send + DynClone {
     /// Apply the mutation to the given target.
-    fn apply(self, target: &mut T);
+    fn apply(self: Box<Self>, target: &mut T);
 }
 
 clone_trait_object!(<T> Mutator<T>);
@@ -52,7 +52,7 @@ impl<L: Lens> LensSet<L> {
     }
 }
 impl<S, T: Debug + Clone + Send, L: Lens<Source = S, Target = T>> Mutator<S> for LensSet<L> {
-    fn apply(self, target: &mut S) {
+    fn apply(self: Box<Self>, target: &mut S) {
         *L::get_mut(target) = self.0.clone()
     }
 }

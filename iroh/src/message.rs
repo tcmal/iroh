@@ -33,4 +33,5 @@ pub enum Message<K: Kind> {
     Select(K::Key),
     NewObject,
     Mutate(Box<dyn Mutator<K>>),
+    Nop,
 }
