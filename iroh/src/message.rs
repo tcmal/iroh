@@ -1,3 +1,5 @@
+//! The message types used throughout the application
+
 use crate::{mutation::Mutator, Kind};
 use iced::pane_grid;
 

@@ -1,3 +1,5 @@
+//! Provides common appearance presets.
+
 use iced::{button, container, pane_grid, Background, Color, Vector};
 
 /// Represents the currently in-use theme. This provides a way to get colours semantically, as in by their purpose.

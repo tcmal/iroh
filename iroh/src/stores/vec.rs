@@ -1,9 +1,9 @@
-use crate::{Kind, ObjectContainer};
+use crate::{Kind, ObjectStore};
 
 /// Vector backed container
 // TODO: Support more than just usize
 pub struct VecContainer<K>(Vec<K>);
-impl<K: Kind<Key = usize>> ObjectContainer<K> for VecContainer<K> {
+impl<K: Kind<Key = usize>> ObjectStore<K> for VecContainer<K> {
     type AllIter<'a> = std::slice::Iter<'a, K>;
     fn all<'a>(&'a self) -> Self::AllIter<'a> {
         self.0.iter()

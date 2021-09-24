@@ -1,10 +1,12 @@
+//! For when you want to actually run the editor
+
 use crate::{
-    message::Message, pane_zone::PaneZone, panes::FieldWidget, theme::Theme, Kind, ObjectContainer,
+    message::Message, pane_zone::PaneZone, panes::FieldWidget, theme::Theme, Kind, ObjectStore,
 };
 use iced::{Element, Sandbox};
 
 /// State of our actual editor.
-pub struct AppState<K: Kind, C: ObjectContainer<K>> {
+pub struct AppState<K: Kind, C: ObjectStore<K>> {
     /// Currently selected object
     selected: Option<K::Key>,
 
@@ -15,7 +17,7 @@ pub struct AppState<K: Kind, C: ObjectContainer<K>> {
     theme: Theme,
 }
 
-impl<K: Kind, C: ObjectContainer<K>> AppState<K, C> {
+impl<K: Kind, C: ObjectStore<K>> AppState<K, C> {
     /// Get a reference to the app's theme.
     pub fn theme(&self) -> &Theme {
         &self.theme
@@ -60,7 +62,7 @@ impl<K: Kind, C: ObjectContainer<K>> AppState<K, C> {
 }
 
 /// The main editor window
-pub struct App<K: Kind, C: ObjectContainer<K>, F: FieldWidget<K>> {
+pub struct App<K: Kind, C: ObjectStore<K>, F: FieldWidget<K>> {
     /// Stores state for splitting & moving around panes
     pane_zone: PaneZone<K, C, F>,
 
@@ -68,7 +70,7 @@ pub struct App<K: Kind, C: ObjectContainer<K>, F: FieldWidget<K>> {
     app_state: AppState<K, C>,
 }
 
-impl<K: Kind, C: ObjectContainer<K>, F: 'static + FieldWidget<K>> Sandbox for App<K, C, F> {
+impl<K: Kind, C: ObjectStore<K>, F: 'static + FieldWidget<K>> Sandbox for App<K, C, F> {
     type Message = Message<K>;
 
     fn new() -> Self {

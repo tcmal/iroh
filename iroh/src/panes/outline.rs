@@ -1,16 +1,19 @@
-use crate::{app::AppState, message::Message, pane_zone::Paneable, Kind, ObjectContainer};
+//! The outline pane
+
+use crate::{app::AppState, message::Message, pane_zone::Paneable, Kind, ObjectStore};
 use iced::{
     button, pane_grid::Pane, scrollable, Align, Button, Column, Element, Length, Row, Scrollable,
     Text,
 };
 
+/// Shows a list of all objects in the store for selection.
 pub struct OutlinePane {
     scrollable_state: scrollable::State,
     new_state: button::State,
     states: Vec<button::State>,
 }
 
-impl<K: Kind, C: ObjectContainer<K>> Paneable<K, C> for OutlinePane {
+impl<K: Kind, C: ObjectStore<K>> Paneable<K, C> for OutlinePane {
     fn view(&mut self, _pane: Pane, app_state: &AppState<K, C>) -> Element<Message<K>> {
         let controls = Row::with_children(vec![Button::new(&mut self.new_state, Text::new("+"))
             .on_press(Message::NewObject)

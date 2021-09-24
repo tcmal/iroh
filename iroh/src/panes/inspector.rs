@@ -1,15 +1,17 @@
+//! The inspector pane
+
+use crate::{app::AppState, message::Message, pane_zone::Paneable, Kind, ObjectStore};
+use iced::{pane_grid::Pane, Column, Element, Text};
 use std::marker::PhantomData;
 
-use crate::{app::AppState, message::Message, pane_zone::Paneable, Kind, ObjectContainer};
-use iced::{pane_grid::Pane, Column, Element, Text};
-
+/// Shows the fields of the currently selected object.
 pub struct InspectorPane<K: Kind, F: FieldWidget<K>>(F, PhantomData<K>);
 impl<K: Kind, F: FieldWidget<K>> Default for InspectorPane<K, F> {
     fn default() -> Self {
         Self(Default::default(), PhantomData)
     }
 }
-impl<K: Kind, C: ObjectContainer<K>, F: FieldWidget<K>> Paneable<K, C> for InspectorPane<K, F> {
+impl<K: Kind, C: ObjectStore<K>, F: FieldWidget<K>> Paneable<K, C> for InspectorPane<K, F> {
     fn view(&mut self, _pane: Pane, app_state: &AppState<K, C>) -> Element<Message<K>> {
         if let Some(val) = app_state.selected() {
             let mut col = Column::new();

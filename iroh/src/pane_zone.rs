@@ -1,8 +1,10 @@
+//! UI logic to deal with splitting & rearranging editor panes.
+
 use crate::{
     app::AppState,
     message::{Message, NewPane, PaneMessage},
     panes::{inspector::InspectorPane, EmptyPane, FieldWidget, OutlinePane},
-    Kind, ObjectContainer,
+    Kind, ObjectStore,
 };
 use iced::{
     button,
@@ -12,18 +14,18 @@ use iced::{
 use std::marker::PhantomData;
 
 /// Something which can be displayed in a pane
-pub trait Paneable<K: Kind, C: ObjectContainer<K>> {
+pub trait Paneable<K: Kind, C: ObjectStore<K>> {
     fn view(&mut self, pane: Pane, app_state: &AppState<K, C>) -> Element<Message<K>>;
     fn title(&self) -> String;
 }
 
 /// A layout with a bunch of varying panes, with all the code to split, rearrange, and resize them.
-pub struct PaneZone<K: Kind, C: ObjectContainer<K>, F: FieldWidget<K>> {
+pub struct PaneZone<K: Kind, C: ObjectStore<K>, F: FieldWidget<K>> {
     panes: pane_grid::State<PaneState<K, C>>,
     _d: PhantomData<F>,
 }
 
-impl<K: Kind, C: ObjectContainer<K>, F: 'static + FieldWidget<K>> PaneZone<K, C, F> {
+impl<K: Kind, C: ObjectStore<K>, F: 'static + FieldWidget<K>> PaneZone<K, C, F> {
     /// Create a new pane zone with one [`EmptyPane`]
     pub fn new(app_state: &AppState<K, C>) -> Self {
         let (panes, _) = pane_grid::State::new(PaneState::new(Box::new(EmptyPane::new(app_state))));
@@ -85,14 +87,14 @@ impl<K: Kind, C: ObjectContainer<K>, F: 'static + FieldWidget<K>> PaneZone<K, C,
 }
 
 /// Wrapper for pane with split controls
-pub struct PaneState<K: Kind, C: ObjectContainer<K>> {
+pub struct PaneState<K: Kind, C: ObjectStore<K>> {
     elem: Box<dyn Paneable<K, C>>,
     h_state: button::State,
     v_state: button::State,
     c_state: button::State,
 }
 
-impl<'a, K: Kind, C: ObjectContainer<K>> PaneState<K, C> {
+impl<'a, K: Kind, C: ObjectStore<K>> PaneState<K, C> {
     /// Create a new pane state, with the given content
     pub fn new(elem: Box<dyn Paneable<K, C>>) -> Self {
         Self {
