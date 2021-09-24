@@ -1,6 +1,5 @@
 use iced::{Element, Text};
-use iroh::{containers::VecContainer, Kind};
-use iroh_editor::{message::Message, panes::FieldWidget, *};
+use iroh::{containers::VecContainer, message::Message, panes::FieldWidget, Kind, *};
 
 /// Example kind
 #[derive(Clone, Debug)]

@@ -1,2 +1,2 @@
 [workspace]
-members = [ "iroh", "example", "iroh-editor" ]
+members = ["iroh", "example"]

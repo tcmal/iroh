@@ -1,6 +1,7 @@
-use crate::{message::Message, pane_zone::PaneZone, panes::FieldWidget, theme::Theme};
+use crate::{
+    message::Message, pane_zone::PaneZone, panes::FieldWidget, theme::Theme, Kind, ObjectContainer,
+};
 use iced::{Element, Sandbox};
-use iroh::{Kind, ObjectContainer};
 
 /// State of our actual editor.
 pub struct AppState<K: Kind, C: ObjectContainer<K>> {

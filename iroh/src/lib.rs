@@ -1,9 +1,16 @@
 #![feature(generic_associated_types)]
 
+pub mod app;
 pub mod containers;
-// TODO mod fields;
 mod kinds;
+pub mod message;
+pub mod mutation;
+pub mod pane_zone;
+pub mod panes;
+pub mod theme;
 
+pub use app::App;
+pub use iced::{Sandbox, Settings};
 pub use kinds::{Key, Kind};
 
 /// A container for objects of differing kinds. Usually, this will be your filetype.

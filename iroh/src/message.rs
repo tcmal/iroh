@@ -1,7 +1,5 @@
+use crate::{mutation::Mutator, Kind};
 use iced::pane_grid;
-use iroh::Kind;
-
-use crate::mutation::Mutator;
 
 /// A message related to a pane zone.
 #[derive(Debug, Clone, Copy)]

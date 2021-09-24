@@ -7,9 +7,9 @@ use crate::{
     app::AppState,
     message::{Message, NewPane, PaneMessage},
     pane_zone::Paneable,
+    Kind, ObjectContainer,
 };
 use iced::{button, pane_grid::Pane, Button, Column, Element, Text};
-use iroh::{Kind, ObjectContainer};
 
 /// An empty pane, which provides buttons to swap it out for any other pane.
 pub struct EmptyPane {

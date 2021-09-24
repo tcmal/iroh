@@ -1,16 +1,15 @@
-use std::marker::PhantomData;
-
 use crate::{
     app::AppState,
     message::{Message, NewPane, PaneMessage},
     panes::{inspector::InspectorPane, EmptyPane, FieldWidget, OutlinePane},
+    Kind, ObjectContainer,
 };
 use iced::{
     button,
     pane_grid::{self, Pane, TitleBar},
     Button, Element, PaneGrid, Row, Text,
 };
-use iroh::{Kind, ObjectContainer};
+use std::marker::PhantomData;
 
 /// Something which can be displayed in a pane
 pub trait Paneable<K: Kind, C: ObjectContainer<K>> {

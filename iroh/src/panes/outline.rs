@@ -1,9 +1,8 @@
-use crate::{app::AppState, message::Message, pane_zone::Paneable};
+use crate::{app::AppState, message::Message, pane_zone::Paneable, Kind, ObjectContainer};
 use iced::{
     button, pane_grid::Pane, scrollable, Align, Button, Column, Element, Length, Row, Scrollable,
     Text,
 };
-use iroh::{Kind, ObjectContainer};
 
 pub struct OutlinePane {
     scrollable_state: scrollable::State,

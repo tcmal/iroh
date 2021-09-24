@@ -1,8 +1,7 @@
 use std::marker::PhantomData;
 
-use crate::{app::AppState, message::Message, pane_zone::Paneable};
+use crate::{app::AppState, message::Message, pane_zone::Paneable, Kind, ObjectContainer};
 use iced::{pane_grid::Pane, Column, Element, Text};
-use iroh::{Kind, ObjectContainer};
 
 pub struct InspectorPane<K: Kind, F: FieldWidget<K>>(F, PhantomData<K>);
 impl<K: Kind, F: FieldWidget<K>> Default for InspectorPane<K, F> {
