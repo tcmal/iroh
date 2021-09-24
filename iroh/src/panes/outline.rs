@@ -30,7 +30,7 @@ impl<K: Kind, C: ObjectStore<K>> Paneable<K, C> for OutlinePane {
             let selected = app_state.is_selected(v.key());
             list = list.push(
                 Button::new(s, Text::new(format!("{:?}", v.key())))
-                    .on_press(Message::Select(v.key()))
+                    .on_press(Message::Select(v.key().clone()))
                     .style(if selected {
                         app_state.theme().button_primary()
                     } else {

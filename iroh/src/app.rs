@@ -24,7 +24,7 @@ impl<K: Kind, C: ObjectStore<K>> AppState<K, C> {
     /// Set the new selected object, if it exists. Otherwise, selection is cleared.
     pub fn select(&mut self, selected: Option<K::Key>) {
         self.selected = match selected {
-            Some(x) => match self.container.exists(x) {
+            Some(x) => match self.container.exists(&x) {
                 true => Some(x),
                 false => None,
             },
@@ -34,21 +34,24 @@ impl<K: Kind, C: ObjectStore<K>> AppState<K, C> {
 
     /// Get a reference to the currently selected object
     pub fn selected(&self) -> Option<&K> {
-        self.selected.and_then(|x| self.container.get(x))
+        self.selected.as_ref().and_then(|x| self.container.get(x))
     }
 
     /// Get a mutable reference to the currently selected object
     pub fn selected_mut(&mut self) -> Option<&mut K> {
-        self.selected.and_then(move |x| self.container.get_mut(x))
+        match self.selected.as_ref() {
+            Some(k) => self.container.get_mut(k),
+            None => None,
+        }
     }
 
     /// Get the currently selected key
-    pub fn selected_key(&self) -> Option<K::Key> {
-        self.selected
+    pub fn selected_key(&self) -> Option<&K::Key> {
+        self.selected.as_ref()
     }
 
-    pub fn is_selected(&self, key: K::Key) -> bool {
-        match self.selected {
+    pub fn is_selected(&self, key: &K::Key) -> bool {
+        match self.selected.as_ref() {
             Some(x) => x == key,
             None => false,
         }
@@ -62,6 +65,12 @@ impl<K: Kind, C: ObjectStore<K>> AppState<K, C> {
     /// Get a mutable reference to the object container.
     pub fn container_mut(&mut self) -> &mut C {
         &mut self.container
+    }
+
+    /// Create a new object, and select it
+    pub fn new(&mut self) {
+        let k = self.container.new().clone();
+        self.select(Some(k));
     }
 }
 
@@ -104,10 +113,7 @@ impl<K: Kind, C: ObjectStore<K>> Sandbox for App<K, C> {
                 self.pane_zone.update(&mut self.app_state, msg);
             }
             Message::Select(x) => self.app_state.select(Some(x)),
-            Message::NewObject => {
-                let k = self.app_state.container_mut().new();
-                self.app_state.select(Some(k));
-            }
+            Message::NewObject => self.app_state.new(),
             Message::Mutate(m) => {
                 if let Some(o) = self.app_state.selected_mut() {
                     println!("{:?} {:?}", m, o);

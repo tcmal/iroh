@@ -6,10 +6,13 @@ use iroh::{
     Kind, *,
 };
 
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct RectId(pub usize);
+
 /// Example kind
 #[derive(Clone, Debug)]
 pub struct Rect {
-    id: usize,
+    id: RectId,
     width: f32,
     height: f32,
 }
@@ -30,11 +33,11 @@ impl Lens for RectWidthLens {
 }
 
 impl Kind for Rect {
-    type Key = usize;
+    type Key = RectId;
     type Field = RectWidthField;
 
-    fn key(&self) -> Self::Key {
-        self.id
+    fn key(&self) -> &Self::Key {
+        &self.id
     }
 
     fn default_with_key(key: Self::Key) -> Self {
@@ -43,6 +46,16 @@ impl Kind for Rect {
             width: 1.0,
             height: 1.0,
         }
+    }
+}
+
+impl Key for RectId {
+    fn first() -> Self {
+        RectId(0)
+    }
+
+    fn next(last: &Self) -> Self {
+        RectId(last.0 + 1)
     }
 }
 
