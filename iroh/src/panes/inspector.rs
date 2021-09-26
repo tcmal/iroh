@@ -12,10 +12,10 @@ impl<F: Field> Default for InspectorPane<F> {
 }
 impl<K: Kind, C: ObjectStore<K>, F: Field<Kind = K>> Paneable<K, C> for InspectorPane<F> {
     fn view(&mut self, _pane: Pane, app_state: &AppState<K, C>) -> Element<Message<K>> {
-        if let Some((key, val)) = app_state.selected() {
+        if let Some((key, val, working)) = app_state.selected() {
             let mut col = Column::new();
 
-            for e in self.0.view(key, val) {
+            for e in self.0.view(key, val, working) {
                 col = col.push(e);
             }
 

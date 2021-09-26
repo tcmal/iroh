@@ -32,15 +32,15 @@ impl<K: Kind, C: ObjectStore<K>> AppState<K, C> {
         }
     }
 
-    /// Get a reference to the currently selected object
-    pub fn selected(&self) -> Option<(&K::Key, &K)> {
+    /// Get a reference to the currently selected object and its working values
+    pub fn selected(&self) -> Option<(&K::Key, &K, &K::WorkingValues)> {
         self.selected
             .as_ref()
-            .and_then(|x| self.container.get(x).map(|y| (x, y)))
+            .and_then(|x| self.container.get(x).map(|(v, w)| (x, v, w)))
     }
 
-    /// Get a mutable reference to the currently selected object
-    pub fn selected_mut(&mut self) -> Option<&mut K> {
+    /// Get a mutable reference to the currently selected object and its working values
+    pub fn selected_mut(&mut self) -> Option<(&mut K, &mut K::WorkingValues)> {
         match self.selected.as_ref() {
             Some(k) => self.container.get_mut(k),
             None => None,
@@ -116,9 +116,10 @@ impl<K: Kind, C: ObjectStore<K>> Sandbox for App<K, C> {
             }
             Message::Select(x) => self.app_state.select(Some(x)),
             Message::NewObject => self.app_state.new(),
-            Message::Mutate(m) => {
-                if let Some(o) = self.app_state.selected_mut() {
-                    m.apply(o);
+            Message::Mutate(vm, wm) => {
+                if let Some((v, w)) = self.app_state.selected_mut() {
+                    vm.apply(v);
+                    wm.apply(w);
                 }
             }
         }

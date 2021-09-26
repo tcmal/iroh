@@ -26,7 +26,7 @@ impl<K: Kind, C: ObjectStore<K>> Paneable<K, C> for OutlinePane {
             self.states.push(button::State::default());
         }
 
-        for ((k, _v), s) in app_state.container().items().zip(self.states.iter_mut()) {
+        for ((k, _v, _), s) in app_state.container().items().zip(self.states.iter_mut()) {
             let selected = app_state.is_selected(k);
             list = list.push(
                 Button::new(s, Text::new(format!("{:?}", k)))

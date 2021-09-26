@@ -32,6 +32,6 @@ pub enum Message<K: Kind> {
     PaneMessage(PaneMessage),
     Select(K::Key),
     NewObject,
-    Mutate(Box<dyn Mutator<K>>),
+    Mutate(Box<dyn Mutator<K>>, Box<dyn Mutator<K::WorkingValues>>),
     Nop,
 }

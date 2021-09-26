@@ -11,6 +11,14 @@ pub trait Mutator<T>: Debug + Send + DynClone {
 
 clone_trait_object!(<T> Mutator<T>);
 
+#[derive(Debug, Clone)]
+pub struct NopMutator;
+impl<T> Mutator<T> for NopMutator {
+    fn apply(self: Box<Self>, _target: &mut T) {
+        ()
+    }
+}
+
 /// A way to get a (mutable) reference into a generic object.
 /// Note that most lenses need never be constructed.
 pub trait Lens: Debug + Send + Clone {

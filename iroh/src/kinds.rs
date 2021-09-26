@@ -8,6 +8,7 @@ use crate::Message;
 /// A type of object contained by a [`ObjectStore`]
 pub trait Kind: 'static + Clone + Debug + Default {
     type Key: Key;
+    type WorkingValues: Default + Debug + Clone;
     type Field: Field<Kind = Self>;
 }
 
@@ -19,6 +20,7 @@ pub trait Field: Default {
         &mut self,
         key: &<<Self as Field>::Kind as Kind>::Key,
         val: &Self::Kind,
+        working: &<<Self as Field>::Kind as Kind>::WorkingValues,
     ) -> Vec<Element<Message<Self::Kind>>>;
 }
 
@@ -36,9 +38,10 @@ impl<K: Kind, A: Field<Kind = K>, B: Field<Kind = K>> Field for ConsFields<A, B>
         &mut self,
         key: &<<Self as Field>::Kind as Kind>::Key,
         val: &Self::Kind,
+        working: &<<Self as Field>::Kind as Kind>::WorkingValues,
     ) -> Vec<Element<Message<Self::Kind>>> {
-        let mut v = self.0.view(key, val);
-        v.extend(self.1.view(key, val));
+        let mut v = self.0.view(key, val, working);
+        v.extend(self.1.view(key, val, working));
 
         v
     }
