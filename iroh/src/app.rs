@@ -33,8 +33,10 @@ impl<K: Kind, C: ObjectStore<K>> AppState<K, C> {
     }
 
     /// Get a reference to the currently selected object
-    pub fn selected(&self) -> Option<&K> {
-        self.selected.as_ref().and_then(|x| self.container.get(x))
+    pub fn selected(&self) -> Option<(&K::Key, &K)> {
+        self.selected
+            .as_ref()
+            .and_then(|x| self.container.get(x).map(|y| (x, y)))
     }
 
     /// Get a mutable reference to the currently selected object
@@ -69,7 +71,7 @@ impl<K: Kind, C: ObjectStore<K>> AppState<K, C> {
 
     /// Create a new object, and select it
     pub fn new(&mut self) {
-        let k = self.container.new().clone();
+        let k = self.container.add().clone();
         self.select(Some(k));
     }
 }

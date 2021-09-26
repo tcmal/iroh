@@ -12,7 +12,6 @@ pub struct RectId(pub usize);
 /// Example kind
 #[derive(Clone, Debug)]
 pub struct Rect {
-    id: RectId,
     width: f32,
     height: f32,
 }
@@ -32,21 +31,18 @@ impl Lens for RectWidthLens {
     }
 }
 
-impl Kind for Rect {
-    type Key = RectId;
-    type Field = RectWidthField;
-
-    fn key(&self) -> &Self::Key {
-        &self.id
-    }
-
-    fn default_with_key(key: Self::Key) -> Self {
+impl Default for Rect {
+    fn default() -> Self {
         Self {
-            id: key,
             width: 1.0,
             height: 1.0,
         }
     }
+}
+
+impl Kind for Rect {
+    type Key = RectId;
+    type Field = RectWidthField;
 }
 
 impl Key for RectId {
@@ -74,7 +70,7 @@ impl Default for RectWidthField {
 impl Field for RectWidthField {
     type Kind = Rect;
 
-    fn view(&mut self, val: &Rect) -> Vec<Element<Message<Rect>>> {
+    fn view(&mut self, _key: &RectId, val: &Rect) -> Vec<Element<Message<Rect>>> {
         self.string_value = format!("{}", val.width);
 
         vec![Row::with_children(vec![

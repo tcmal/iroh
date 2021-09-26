@@ -26,11 +26,11 @@ impl<K: Kind, C: ObjectStore<K>> Paneable<K, C> for OutlinePane {
             self.states.push(button::State::default());
         }
 
-        for (v, s) in app_state.container().all().zip(self.states.iter_mut()) {
-            let selected = app_state.is_selected(v.key());
+        for ((k, _v), s) in app_state.container().items().zip(self.states.iter_mut()) {
+            let selected = app_state.is_selected(k);
             list = list.push(
-                Button::new(s, Text::new(format!("{:?}", v.key())))
-                    .on_press(Message::Select(v.key().clone()))
+                Button::new(s, Text::new(format!("{:?}", k)))
+                    .on_press(Message::Select(k.clone()))
                     .style(if selected {
                         app_state.theme().button_primary()
                     } else {

@@ -8,13 +8,20 @@ pub use vec::VecContainer;
 /// A container for objects of differing kinds. Usually, this will be your filetype.
 pub trait ObjectStore<K: 'static + Kind> {
     fn empty() -> Self;
-    fn new(&mut self) -> &K::Key;
+    fn add(&mut self) -> &K::Key;
 
-    type AllIter<'a>: Iterator<Item = &'a K>;
-    fn all<'a>(&'a self) -> Self::AllIter<'a>;
+    type Items<'a>: Iterator<Item = (&'a K::Key, &'a K)>;
+    fn items<'a>(&'a self) -> Self::Items<'a>;
 
-    fn exists(&self, key: &K::Key) -> bool;
+    type Keys<'a>: Iterator<Item = &'a K::Key>;
+    fn keys<'a>(&'a self) -> Self::Keys<'a>;
+
+    type Values<'a>: Iterator<Item = &'a K>;
+    fn values<'a>(&'a self) -> Self::Values<'a>;
+
     fn get(&self, key: &K::Key) -> Option<&K>;
     fn get_mut(&mut self, key: &K::Key) -> Option<&mut K>;
+
+    fn exists(&self, key: &K::Key) -> bool;
     fn count(&self) -> usize;
 }
