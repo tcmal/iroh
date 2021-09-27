@@ -2,6 +2,7 @@
 
 pub mod app;
 pub mod kinds;
+pub mod lens;
 pub mod message;
 pub mod mutation;
 mod pane_zone;

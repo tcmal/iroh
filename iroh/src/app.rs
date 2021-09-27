@@ -97,7 +97,7 @@ impl<K: Kind, C: ObjectStore<K>> Sandbox for App<K, C> {
             container: C::empty(),
         };
         Self {
-            pane_zone: PaneZone::new(&app_state),
+            pane_zone: PaneZone::new(),
             app_state,
         }
     }
@@ -114,7 +114,7 @@ impl<K: Kind, C: ObjectStore<K>> Sandbox for App<K, C> {
         match message {
             Message::Nop => (),
             Message::PaneMessage(msg) => {
-                self.pane_zone.update(&mut self.app_state, msg);
+                self.pane_zone.update(msg);
             }
             Message::Select(x) => self.app_state.select(Some(x)),
             Message::NewObject => self.app_state.new(),

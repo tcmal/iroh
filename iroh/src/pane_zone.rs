@@ -25,8 +25,8 @@ pub struct PaneZone<K: Kind, C: ObjectStore<K>> {
 
 impl<K: Kind, C: ObjectStore<K>> PaneZone<K, C> {
     /// Create a new pane zone with one [`EmptyPane`]
-    pub fn new(app_state: &AppState<K, C>) -> Self {
-        let (panes, _) = pane_grid::State::new(PaneState::new(Box::new(EmptyPane::new(app_state))));
+    pub fn new() -> Self {
+        let (panes, _) = pane_grid::State::new(PaneState::new(Box::new(EmptyPane::default())));
         Self { panes }
     }
 
@@ -42,14 +42,11 @@ impl<K: Kind, C: ObjectStore<K>> PaneZone<K, C> {
     }
 
     /// Process the given message
-    pub fn update(&mut self, app_state: &mut AppState<K, C>, msg: PaneMessage) {
+    pub fn update(&mut self, msg: PaneMessage) {
         match msg {
             PaneMessage::Split(axis, pane) => {
-                self.panes.split(
-                    axis,
-                    &pane,
-                    PaneState::new(Box::new(EmptyPane::new(app_state))),
-                );
+                self.panes
+                    .split(axis, &pane, PaneState::new(Box::new(EmptyPane::default())));
             }
             PaneMessage::Resize(e) => {
                 self.panes.resize(&e.split, e.ratio);
@@ -128,5 +125,11 @@ impl<'a, K: Kind, C: ObjectStore<K>> PaneState<K, C> {
         pane_grid::Content::new(content)
             .title_bar(title_bar)
             .style(app_state.theme().container_primary())
+    }
+}
+
+impl<K: Kind, C: ObjectStore<K>> Default for PaneZone<K, C> {
+    fn default() -> Self {
+        Self::new()
     }
 }

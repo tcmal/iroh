@@ -17,20 +17,28 @@ pub struct EmptyPane {
     inspector_state: button::State,
 }
 impl EmptyPane {
-    pub fn new<K: Kind, C: ObjectStore<K>>(_app_state: &AppState<K, C>) -> Self {
+    /// Create a new empty pane
+    pub fn new() -> Self {
         Self {
             outline_state: button::State::default(),
             inspector_state: button::State::default(),
         }
     }
 }
+impl Default for EmptyPane {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 impl<K: Kind, C: ObjectStore<K>> Paneable<K, C> for EmptyPane {
     fn view(&mut self, pane: Pane, app_state: &AppState<K, C>) -> Element<Message<K>> {
         Column::with_children(vec![
+            // Outline
             Button::new(&mut self.outline_state, Text::new("Outline"))
                 .style(app_state.theme().button_primary())
                 .on_press(PaneMessage::Set(pane, NewPane::Outline).into())
                 .into(),
+            // Inspector
             Button::new(&mut self.inspector_state, Text::new("Inspector"))
                 .style(app_state.theme().button_primary())
                 .on_press(PaneMessage::Set(pane, NewPane::Inspector).into())
@@ -42,6 +50,6 @@ impl<K: Kind, C: ObjectStore<K>> Paneable<K, C> for EmptyPane {
     }
 
     fn title(&self) -> String {
-        "Hello, World!".into()
+        "Empty".into()
     }
 }

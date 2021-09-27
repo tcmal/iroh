@@ -10,9 +10,8 @@ impl<F: Field> Default for InspectorPane<F> {
         Self(Default::default())
     }
 }
-impl<K: Kind<Field = F>, C: ObjectStore<K>, F: Field<Kind = K>> Paneable<K, C>
-    for InspectorPane<F>
-{
+
+impl<K: Kind, C: ObjectStore<K>> Paneable<K, C> for InspectorPane<K::Field> {
     fn view(&mut self, _pane: Pane, app_state: &AppState<K, C>) -> Element<Message<K>> {
         if let Some((key, val, working)) = app_state.selected() {
             let mut col = Column::new();

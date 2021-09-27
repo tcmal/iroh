@@ -1,12 +1,12 @@
 //! Traits and structs related to the representation of kinds.
-use std::fmt::Debug;
-
-use iced::Element;
 
 use crate::{
-    mutation::{InnerMutation, TupleHeadLens, TupleTailLens},
+    lens::{TupleHeadLens, TupleTailLens},
+    mutation::InnerMutation,
     Message,
 };
+use iced::Element;
+use std::fmt::Debug;
 
 /// A type of object contained by a [`ObjectStore`]
 pub trait Kind: 'static + Clone + Debug + Default {
@@ -45,6 +45,9 @@ impl<K: Kind, A: Field<Kind = K>, B: Field<Kind = K>> Field for ConsFields<A, B>
         val: &Self::Kind,
         working: &<Self as Field>::WorkingValues,
     ) -> Vec<Element<Message<Self::Kind, Self::WorkingValues>>> {
+        // Because a returns a message with working values A::WorkingValues, and b returns one with B::WorkingValues,
+        // we need to map each one to our WorkingValues.
+        // This is why we have a lot of big match arms. Technically we could `transmute`, but that's nasty.
         let a = self.0.view(key, val, &working.0).into_iter().map(|x| {
             x.map(|m| match m {
                 Message::Mutate(v, w) => Message::Mutate(
