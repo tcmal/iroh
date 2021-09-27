@@ -11,14 +11,8 @@ use std::{
     str::FromStr,
 };
 
-/// A type that can be converted to from a text input.
-/// We don't use FromStr because we want full control over what valid input is.
-/// For instance, when parsing floats we fail when there's a trailing . because otherwise
-/// they are immediately erased.
-pub trait FromTextInput: Sized + Display {
-    fn from_input(s: &str) -> Option<Self>;
-}
-
+/// A field which the user sets a value for using a text input.
+/// Uses a lens to get/set the right field on the struct.
 #[derive(Debug, Clone)]
 pub struct TextInputField<L> {
     string_value: String,
@@ -71,6 +65,15 @@ where
         .into()]
     }
 }
+
+/// A type that can be converted to from a text input.
+/// We don't use FromStr because we want full control over what valid input is.
+/// For instance, when parsing floats we fail when there's a trailing . because otherwise
+/// they are immediately erased.
+pub trait FromTextInput: Sized + Display {
+    fn from_input(s: &str) -> Option<Self>;
+}
+
 impl<L> Default for TextInputField<L> {
     fn default() -> Self {
         Self {
@@ -81,6 +84,8 @@ impl<L> Default for TextInputField<L> {
     }
 }
 
+/// Implementation for anything that implements FromStr
+/// This also checks that the [`std::fmt::Display`] representation is the same as what the user inputted.
 impl<T: Display + FromStr> FromTextInput for T {
     fn from_input(s: &str) -> Option<Self> {
         if let Ok(x) = <Self as FromStr>::from_str(s) {
