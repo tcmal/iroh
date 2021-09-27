@@ -1,6 +1,6 @@
 //! For when you want to actually run the editor
 
-use crate::{message::Message, pane_zone::PaneZone, theme::Theme, Kind, ObjectStore};
+use crate::{message::Message, pane_zone::PaneZone, theme::Theme, Field, Kind, ObjectStore};
 use iced::{Element, Sandbox};
 
 /// State of our actual editor.
@@ -33,14 +33,16 @@ impl<K: Kind, C: ObjectStore<K>> AppState<K, C> {
     }
 
     /// Get a reference to the currently selected object and its working values
-    pub fn selected(&self) -> Option<(&K::Key, &K, &K::WorkingValues)> {
+    pub fn selected(&self) -> Option<(&K::Key, &K, &<<K as Kind>::Field as Field>::WorkingValues)> {
         self.selected
             .as_ref()
             .and_then(|x| self.container.get(x).map(|(v, w)| (x, v, w)))
     }
 
     /// Get a mutable reference to the currently selected object and its working values
-    pub fn selected_mut(&mut self) -> Option<(&mut K, &mut K::WorkingValues)> {
+    pub fn selected_mut(
+        &mut self,
+    ) -> Option<(&mut K, &mut <<K as Kind>::Field as Field>::WorkingValues)> {
         match self.selected.as_ref() {
             Some(k) => self.container.get_mut(k),
             None => None,

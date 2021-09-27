@@ -1,6 +1,6 @@
 //! The message types used throughout the application
 
-use crate::{mutation::Mutator, Kind};
+use crate::{mutation::Mutator, Field, Kind};
 use iced::pane_grid;
 
 /// A message related to a pane zone.
@@ -28,10 +28,14 @@ impl<K: Kind> Into<Message<K>> for PaneMessage {
 
 /// Root message type for our app.
 #[derive(Debug, Clone)]
-pub enum Message<K: Kind> {
+pub enum Message<K, W = <<K as Kind>::Field as Field>::WorkingValues>
+where
+    W: 'static + std::fmt::Debug + Clone + Send,
+    K: Kind,
+{
     PaneMessage(PaneMessage),
     Select(K::Key),
     NewObject,
-    Mutate(Box<dyn Mutator<K>>, Box<dyn Mutator<K::WorkingValues>>),
+    Mutate(Box<dyn Mutator<K>>, Box<dyn Mutator<W>>),
     Nop,
 }

@@ -1,9 +1,10 @@
-use crate::{Key, Kind, ObjectStore};
+use crate::{Field, Key, Kind, ObjectStore};
 
 /// Vector backed container
-pub struct VecContainer<K: Kind>(Vec<(K::Key, K, K::WorkingValues)>);
+pub struct VecContainer<K: Kind>(Vec<(K::Key, K, <K::Field as Field>::WorkingValues)>);
 impl<E: Key + Ord, K: Kind<Key = E>> ObjectStore<K> for VecContainer<K> {
-    type Items<'a> = PopTupleRefs<std::slice::Iter<'a, (K::Key, K, K::WorkingValues)>>;
+    type Items<'a> =
+        PopTupleRefs<std::slice::Iter<'a, (K::Key, K, <K::Field as Field>::WorkingValues)>>;
     fn items<'a>(&'a self) -> Self::Items<'a> {
         PopTupleRefs::new(self.0.iter())
     }
@@ -26,33 +27,41 @@ impl<E: Key + Ord, K: Kind<Key = E>> ObjectStore<K> for VecContainer<K> {
         } else {
             K::Key::first()
         };
-        self.0
-            .push((next, K::default(), K::WorkingValues::default()));
+        self.0.push((
+            next,
+            K::default(),
+            <K::Field as Field>::WorkingValues::default(),
+        ));
 
         &self.0.last().unwrap().0
     }
 
-    fn get(&self, key: &K::Key) -> Option<(&K, &<K as Kind>::WorkingValues)> {
+    fn get(&self, key: &K::Key) -> Option<(&K, &<K::Field as Field>::WorkingValues)> {
         self.0
             .iter()
             .find(|(k, _, _)| k == key)
             .map(|(_, v, w)| (v, w))
     }
 
-    fn get_mut(&mut self, key: &K::Key) -> Option<(&mut K, &mut <K as Kind>::WorkingValues)> {
+    fn get_mut(
+        &mut self,
+        key: &K::Key,
+    ) -> Option<(&mut K, &mut <K::Field as Field>::WorkingValues)> {
         self.0
             .iter_mut()
             .find(|(k, _, _)| k == key)
             .map(|(_, v, w)| (v, w))
     }
 
-    type Keys<'a> = FirstTupleElem<std::slice::Iter<'a, (K::Key, K, K::WorkingValues)>>;
+    type Keys<'a> =
+        FirstTupleElem<std::slice::Iter<'a, (K::Key, K, <K::Field as Field>::WorkingValues)>>;
 
     fn keys<'a>(&'a self) -> Self::Keys<'a> {
         FirstTupleElem::new(self.0.iter())
     }
 
-    type Values<'a> = SecondTupleElem<std::slice::Iter<'a, (K::Key, K, K::WorkingValues)>>;
+    type Values<'a> =
+        SecondTupleElem<std::slice::Iter<'a, (K::Key, K, <K::Field as Field>::WorkingValues)>>;
 
     fn values<'a>(&'a self) -> Self::Values<'a> {
         SecondTupleElem::new(self.0.iter())

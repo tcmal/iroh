@@ -3,28 +3,32 @@ use std::fmt::Debug;
 
 use iced::Element;
 
-use crate::Message;
+use crate::{
+    mutation::{InnerMutation, TupleHeadLens, TupleTailLens},
+    Message,
+};
 
 /// A type of object contained by a [`ObjectStore`]
 pub trait Kind: 'static + Clone + Debug + Default {
     type Key: Key;
-    type WorkingValues: Default + Debug + Clone;
     type Field: Field<Kind = Self>;
 }
 
 /// A single editable part of a Kind
-pub trait Field: Default {
+pub trait Field: Default + Clone + Debug {
     type Kind: Kind;
+    type WorkingValues: 'static + Default + Debug + Clone + Send;
 
     fn view(
         &mut self,
         key: &<<Self as Field>::Kind as Kind>::Key,
         val: &Self::Kind,
-        working: &<<Self as Field>::Kind as Kind>::WorkingValues,
-    ) -> Vec<Element<Message<Self::Kind>>>;
+        working: &<Self as Field>::WorkingValues,
+    ) -> Vec<Element<Message<Self::Kind, Self::WorkingValues>>>;
 }
 
 /// One field, then the other.
+#[derive(Debug, Clone)]
 pub struct ConsFields<A, B>(A, B);
 impl<K: Kind, A: Field<Kind = K>, B: Field<Kind = K>> Default for ConsFields<A, B> {
     fn default() -> Self {
@@ -33,17 +37,44 @@ impl<K: Kind, A: Field<Kind = K>, B: Field<Kind = K>> Default for ConsFields<A, 
 }
 impl<K: Kind, A: Field<Kind = K>, B: Field<Kind = K>> Field for ConsFields<A, B> {
     type Kind = K;
+    type WorkingValues = (A::WorkingValues, B::WorkingValues);
 
     fn view(
         &mut self,
         key: &<<Self as Field>::Kind as Kind>::Key,
         val: &Self::Kind,
-        working: &<<Self as Field>::Kind as Kind>::WorkingValues,
-    ) -> Vec<Element<Message<Self::Kind>>> {
-        let mut v = self.0.view(key, val, working);
-        v.extend(self.1.view(key, val, working));
+        working: &<Self as Field>::WorkingValues,
+    ) -> Vec<Element<Message<Self::Kind, Self::WorkingValues>>> {
+        let a = self.0.view(key, val, &working.0).into_iter().map(|x| {
+            x.map(|m| match m {
+                Message::Mutate(v, w) => Message::Mutate(
+                    v,
+                    Box::new(InnerMutation::<
+                        TupleHeadLens<A::WorkingValues, B::WorkingValues>,
+                    >::new(w)),
+                ),
+                Message::PaneMessage(m) => Message::PaneMessage(m),
+                Message::Select(s) => Message::Select(s),
+                Message::NewObject => Message::NewObject,
+                Message::Nop => Message::Nop,
+            })
+        });
+        let b = self.1.view(key, val, &working.1).into_iter().map(|x| {
+            x.map(|m| match m {
+                Message::Mutate(v, w) => Message::Mutate(
+                    v,
+                    Box::new(InnerMutation::<
+                        TupleTailLens<A::WorkingValues, B::WorkingValues>,
+                    >::new(w)),
+                ),
+                Message::PaneMessage(m) => Message::PaneMessage(m),
+                Message::Select(s) => Message::Select(s),
+                Message::NewObject => Message::NewObject,
+                Message::Nop => Message::Nop,
+            })
+        });
 
-        v
+        a.chain(b).collect()
     }
 }
 

@@ -1,7 +1,8 @@
 use iced::{text_input, Element, Row, Text, TextInput};
 use iroh::{
+    kinds::ConsFields,
     message::Message,
-    mutation::{Lens, LensSet, NopMutator},
+    mutation::{Lens, LensSet, NopMutator, RootLens},
     stores::VecContainer,
     Kind, *,
 };
@@ -31,6 +32,21 @@ impl Lens for RectWidthLens {
     }
 }
 
+#[derive(Debug, Clone)]
+struct RectHeightLens;
+impl Lens for RectHeightLens {
+    type Source = Rect;
+    type Target = f32;
+
+    fn get<'a>(source: &'a Self::Source) -> &'a Self::Target {
+        &source.height
+    }
+
+    fn get_mut<'a>(source: &'a mut Self::Source) -> &'a mut Self::Target {
+        &mut source.height
+    }
+}
+
 impl Default for Rect {
     fn default() -> Self {
         Self {
@@ -39,41 +55,9 @@ impl Default for Rect {
         }
     }
 }
-
-#[derive(Debug, Clone)]
-pub struct RectWorkingValues {
-    width: Option<String>,
-    height: Option<String>,
-}
-
-impl Default for RectWorkingValues {
-    fn default() -> Self {
-        Self {
-            width: None,
-            height: None,
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-struct RectWorkingWidthLens;
-impl Lens for RectWorkingWidthLens {
-    type Source = RectWorkingValues;
-    type Target = Option<String>;
-
-    fn get<'a>(source: &'a Self::Source) -> &'a Self::Target {
-        &source.width
-    }
-
-    fn get_mut<'a>(source: &'a mut Self::Source) -> &'a mut Self::Target {
-        &mut source.width
-    }
-}
-
 impl Kind for Rect {
     type Key = RectId;
-    type Field = RectWidthField;
-    type WorkingValues = RectWorkingValues;
+    type Field = ConsFields<RectWidthField, RectHeightField>;
 }
 
 impl Key for RectId {
@@ -86,6 +70,7 @@ impl Key for RectId {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct RectWidthField {
     string_value: String,
     input_state: text_input::State,
@@ -100,14 +85,15 @@ impl Default for RectWidthField {
 }
 impl Field for RectWidthField {
     type Kind = Rect;
+    type WorkingValues = Option<String>;
 
     fn view(
         &mut self,
         _key: &RectId,
         val: &Rect,
-        working: &RectWorkingValues,
-    ) -> Vec<Element<Message<Rect>>> {
-        let _out_of_sync = if let Some(w) = working.width.clone() {
+        working: &Option<String>,
+    ) -> Vec<Element<Message<Rect, Self::WorkingValues>>> {
+        let _out_of_sync = if let Some(w) = working.clone() {
             self.string_value = w;
 
             true
@@ -126,14 +112,72 @@ impl Field for RectWidthField {
                     if format!("{}", v) == new {
                         return Message::Mutate(
                             Box::new(LensSet::<RectWidthLens>::new(v)),
-                            Box::new(LensSet::<RectWorkingWidthLens>::new(None)),
+                            Box::new(LensSet::<RootLens<_>>::new(None)),
                         );
                     }
                 }
 
                 Message::Mutate(
                     Box::new(NopMutator),
-                    Box::new(LensSet::<RectWorkingWidthLens>::new(Some(new))),
+                    Box::new(LensSet::<RootLens<_>>::new(Some(new))),
+                )
+            })
+            .into(),
+        ])
+        .into()]
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct RectHeightField {
+    string_value: String,
+    input_state: text_input::State,
+}
+impl Default for RectHeightField {
+    fn default() -> Self {
+        Self {
+            input_state: text_input::State::default(),
+            string_value: "".to_string(),
+        }
+    }
+}
+impl Field for RectHeightField {
+    type Kind = Rect;
+    type WorkingValues = Option<String>;
+
+    fn view(
+        &mut self,
+        _key: &RectId,
+        val: &Rect,
+        working: &Option<String>,
+    ) -> Vec<Element<Message<Rect, Self::WorkingValues>>> {
+        let _out_of_sync = if let Some(w) = working.clone() {
+            self.string_value = w;
+
+            true
+        } else {
+            self.string_value = format!("{}", val.height);
+
+            false
+        };
+
+        // TODO: Style based on `_out_of_sync`
+
+        vec![Row::with_children(vec![
+            Text::new("Height").into(),
+            TextInput::new(&mut self.input_state, "Height", &self.string_value, |new| {
+                if let Ok(v) = new.parse() {
+                    if format!("{}", v) == new {
+                        return Message::Mutate(
+                            Box::new(LensSet::<RectHeightLens>::new(v)),
+                            Box::new(LensSet::<RootLens<_>>::new(None)),
+                        );
+                    }
+                }
+
+                Message::Mutate(
+                    Box::new(NopMutator),
+                    Box::new(LensSet::<RootLens<_>>::new(Some(new))),
                 )
             })
             .into(),
