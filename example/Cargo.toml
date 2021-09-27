@@ -7,4 +7,5 @@ edition = "2018"
 
 [dependencies]
 iroh = { path = "../iroh/" }
+iroh-codegen = { path = "../iroh-codegen/" }
 iced = "0.3"

@@ -1,10 +1,10 @@
 use iroh::{fields::TextInputField, kinds::ConsFields, stores::VecContainer, Kind, *};
 
-mod lens;
-use lens::*;
+#[macro_use]
+extern crate iroh_codegen;
 
 /// Example kind
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Lens)]
 pub struct Rect {
     width: f32,
     height: f32,

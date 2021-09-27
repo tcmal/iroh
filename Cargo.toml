@@ -1,2 +1,2 @@
 [workspace]
-members = ["iroh", "example"]
+members = ["iroh", "iroh-codegen", "example"]
