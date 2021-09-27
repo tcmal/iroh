@@ -1,6 +1,7 @@
 #![feature(generic_associated_types)]
 
 pub mod app;
+pub mod fields;
 pub mod kinds;
 pub mod lens;
 pub mod message;

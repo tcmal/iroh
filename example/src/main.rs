@@ -1,9 +1,7 @@
-use iroh::{kinds::ConsFields, stores::VecContainer, Kind, *};
+use iroh::{fields::TextInputField, kinds::ConsFields, stores::VecContainer, Kind, *};
 
 mod lens;
-
-mod fields;
-use fields::*;
+use lens::*;
 
 /// Example kind
 #[derive(Clone, Debug)]
@@ -22,7 +20,7 @@ impl Default for Rect {
 }
 impl Kind for Rect {
     type Key = RectId;
-    type Field = ConsFields<RectWidthField, RectHeightField>;
+    type Field = ConsFields<TextInputField<RectWidthLens>, TextInputField<RectHeightLens>>;
 }
 
 /// The key for our example kind
