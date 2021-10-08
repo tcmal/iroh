@@ -1,4 +1,4 @@
-#![feature(generic_associated_types)]
+#![feature(generic_associated_types, const_generics)]
 
 pub mod app;
 pub mod fields;

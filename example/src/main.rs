@@ -20,7 +20,10 @@ impl Default for Rect {
 }
 impl Kind for Rect {
     type Key = RectId;
-    type Field = ConsFields<TextInputField<RectWidthLens>, TextInputField<RectHeightLens>>;
+    type Field = ConsFields<
+        TextInputField<"Width", RectWidthLens>,
+        TextInputField<"Height", RectHeightLens>,
+    >;
 }
 
 /// The key for our example kind

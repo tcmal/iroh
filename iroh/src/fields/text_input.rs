@@ -14,12 +14,12 @@ use std::{
 /// A field which the user sets a value for using a text input.
 /// Uses a lens to get/set the right field on the struct.
 #[derive(Debug, Clone)]
-pub struct TextInputField<L> {
+pub struct TextInputField<const N: &'static str, L> {
     string_value: String,
     input_state: text_input::State,
     _d: PhantomData<L>,
 }
-impl<L: 'static + Lens> Field for TextInputField<L>
+impl<const N: &'static str, L: 'static + Lens> Field for TextInputField<N, L>
 where
     L::Source: Kind,
     L::Target: 'static + FromTextInput + Debug + Clone + Send,
@@ -46,8 +46,8 @@ where
         // TODO: Style based on `_out_of_sync`
 
         vec![Row::with_children(vec![
-            Text::new("TODO").into(),
-            TextInput::new(&mut self.input_state, "TODO", &self.string_value, |new| {
+            Text::new(N).into(),
+            TextInput::new(&mut self.input_state, N, &self.string_value, |new| {
                 if let Some(v) = L::Target::from_input(&new) {
                     return Message::Mutate(
                         Box::new(LensSet::<L>::new(v)),
@@ -74,7 +74,7 @@ pub trait FromTextInput: Sized + Display {
     fn from_input(s: &str) -> Option<Self>;
 }
 
-impl<L> Default for TextInputField<L> {
+impl<const N: &'static str, L> Default for TextInputField<N, L> {
     fn default() -> Self {
         Self {
             input_state: text_input::State::default(),
