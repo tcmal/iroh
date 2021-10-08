@@ -1,6 +1,6 @@
 //! Provides common appearance presets.
 
-use iced::{button, container, pane_grid, Background, Color, Vector};
+use iced::{button, container, pane_grid, text_input, Background, Color, Vector};
 
 /// Represents the currently in-use theme. This provides a way to get colours semantically, as in by their purpose.
 #[derive(Debug, Clone)]
@@ -82,6 +82,18 @@ impl Theme {
             .into(),
         }
     }
+
+    /// Style for normal text inputs
+    pub fn text_input(&self) -> Box<dyn text_input::StyleSheet> {
+        match self {
+            Theme::Dark => Box::new(TextInputStyle {
+                bg: dark::BACKGROUND_PRIMARY,
+                border_normal: mult(dark::BACKGROUND_PRIMARY, 1.1),
+                border_focused: dark::BACKGROUND_ACCENT,
+                text: dark::TEXT_PRIMARY,
+            }),
+        }
+    }
 }
 
 impl Into<Box<dyn pane_grid::StyleSheet>> for &Theme {
@@ -150,6 +162,56 @@ impl pane_grid::StyleSheet for PaneGridStyle {
             width: 1.0,
         })
     }
+}
+struct TextInputStyle {
+    bg: Color,
+    border_normal: Color,
+    border_focused: Color,
+    text: Color,
+}
+impl text_input::StyleSheet for TextInputStyle {
+    fn active(&self) -> text_input::Style {
+        text_input::Style {
+            background: Background::Color(self.bg),
+            border_radius: 0.0,
+            border_width: 1.0,
+            border_color: self.border_normal,
+        }
+    }
+
+    fn focused(&self) -> text_input::Style {
+        text_input::Style {
+            background: Background::Color(self.bg),
+            border_radius: 0.0,
+            border_width: 1.0,
+            border_color: self.border_focused,
+        }
+    }
+
+    fn placeholder_color(&self) -> Color {
+        mult(self.text, 0.9)
+    }
+
+    fn value_color(&self) -> Color {
+        self.text
+    }
+
+    fn selection_color(&self) -> Color {
+        mult(self.bg, 1.1)
+    }
+
+    fn hovered(&self) -> text_input::Style {
+        let mut s = self.focused();
+        s.border_radius = 0.5;
+
+        s
+    }
+}
+
+fn mult(c: Color, f: f32) -> Color {
+    let a = c.into_linear();
+
+    Color::from_rgba(a[0] * f, a[1] * f, a[2] * f, a[3] * f)
 }
 
 mod dark {

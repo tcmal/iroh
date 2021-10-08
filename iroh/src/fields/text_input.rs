@@ -1,10 +1,11 @@
 use crate::{
+    app::AppState,
     lens::{Lens, RootLens},
     message::Message,
     mutation::{LensSet, NopMutator},
-    Field, Kind,
+    Field, Kind, ObjectStore,
 };
-use iced::{text_input, Element, Row, Text, TextInput};
+use iced::{text_input, Align, Element, Row, Text, TextInput};
 use std::{
     fmt::{Debug, Display},
     marker::PhantomData,
@@ -27,10 +28,11 @@ where
     type Kind = L::Source;
     type WorkingValues = Option<String>;
 
-    fn view(
+    fn view<C: ObjectStore<Self::Kind>>(
         &mut self,
         _key: &<L::Source as Kind>::Key,
         val: &L::Source,
+        app_state: &AppState<Self::Kind, C>,
         working: &Option<String>,
     ) -> Vec<Element<Message<L::Source, Self::WorkingValues>>> {
         let _out_of_sync = if let Some(w) = working.clone() {
@@ -46,7 +48,7 @@ where
         // TODO: Style based on `_out_of_sync`
 
         vec![Row::with_children(vec![
-            Text::new(N).into(),
+            Text::new(N).color(app_state.theme().text_primary()).into(),
             TextInput::new(&mut self.input_state, N, &self.string_value, |new| {
                 if let Some(v) = L::Target::from_input(&new) {
                     return Message::Mutate(
@@ -60,8 +62,13 @@ where
                     )
                 }
             })
+            .style(app_state.theme().text_input())
+            .padding(5)
             .into(),
         ])
+        .spacing(4)
+        .padding(8)
+        .align_items(Align::Center)
         .into()]
     }
 }

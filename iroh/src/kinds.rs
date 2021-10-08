@@ -1,9 +1,10 @@
 //! Traits and structs related to the representation of kinds.
 
 use crate::{
+    app::AppState,
     lens::{TupleHeadLens, TupleTailLens},
     mutation::InnerMutation,
-    Message,
+    Message, ObjectStore,
 };
 use iced::Element;
 use std::fmt::Debug;
@@ -19,10 +20,11 @@ pub trait Field: Default + Clone + Debug {
     type Kind: Kind;
     type WorkingValues: 'static + Default + Debug + Clone + Send;
 
-    fn view(
+    fn view<C: ObjectStore<Self::Kind>>(
         &mut self,
         key: &<<Self as Field>::Kind as Kind>::Key,
         val: &Self::Kind,
+        app_state: &AppState<Self::Kind, C>,
         working: &<Self as Field>::WorkingValues,
     ) -> Vec<Element<Message<Self::Kind, Self::WorkingValues>>>;
 }
@@ -39,43 +41,52 @@ impl<K: Kind, A: Field<Kind = K>, B: Field<Kind = K>> Field for ConsFields<A, B>
     type Kind = K;
     type WorkingValues = (A::WorkingValues, B::WorkingValues);
 
-    fn view(
+    fn view<C: ObjectStore<Self::Kind>>(
         &mut self,
         key: &<<Self as Field>::Kind as Kind>::Key,
         val: &Self::Kind,
+        app_state: &AppState<Self::Kind, C>,
         working: &<Self as Field>::WorkingValues,
     ) -> Vec<Element<Message<Self::Kind, Self::WorkingValues>>> {
         // Because a returns a message with working values A::WorkingValues, and b returns one with B::WorkingValues,
         // we need to map each one to our WorkingValues.
         // This is why we have a lot of big match arms. Technically we could `transmute`, but that's nasty.
-        let a = self.0.view(key, val, &working.0).into_iter().map(|x| {
-            x.map(|m| match m {
-                Message::Mutate(v, w) => Message::Mutate(
-                    v,
-                    Box::new(InnerMutation::<
-                        TupleHeadLens<A::WorkingValues, B::WorkingValues>,
-                    >::new(w)),
-                ),
-                Message::PaneMessage(m) => Message::PaneMessage(m),
-                Message::Select(s) => Message::Select(s),
-                Message::NewObject => Message::NewObject,
-                Message::Nop => Message::Nop,
-            })
-        });
-        let b = self.1.view(key, val, &working.1).into_iter().map(|x| {
-            x.map(|m| match m {
-                Message::Mutate(v, w) => Message::Mutate(
-                    v,
-                    Box::new(InnerMutation::<
-                        TupleTailLens<A::WorkingValues, B::WorkingValues>,
-                    >::new(w)),
-                ),
-                Message::PaneMessage(m) => Message::PaneMessage(m),
-                Message::Select(s) => Message::Select(s),
-                Message::NewObject => Message::NewObject,
-                Message::Nop => Message::Nop,
-            })
-        });
+        let a = self
+            .0
+            .view(key, val, app_state, &working.0)
+            .into_iter()
+            .map(|x| {
+                x.map(|m| match m {
+                    Message::Mutate(v, w) => Message::Mutate(
+                        v,
+                        Box::new(InnerMutation::<
+                            TupleHeadLens<A::WorkingValues, B::WorkingValues>,
+                        >::new(w)),
+                    ),
+                    Message::PaneMessage(m) => Message::PaneMessage(m),
+                    Message::Select(s) => Message::Select(s),
+                    Message::NewObject => Message::NewObject,
+                    Message::Nop => Message::Nop,
+                })
+            });
+        let b = self
+            .1
+            .view(key, val, app_state, &working.1)
+            .into_iter()
+            .map(|x| {
+                x.map(|m| match m {
+                    Message::Mutate(v, w) => Message::Mutate(
+                        v,
+                        Box::new(InnerMutation::<
+                            TupleTailLens<A::WorkingValues, B::WorkingValues>,
+                        >::new(w)),
+                    ),
+                    Message::PaneMessage(m) => Message::PaneMessage(m),
+                    Message::Select(s) => Message::Select(s),
+                    Message::NewObject => Message::NewObject,
+                    Message::Nop => Message::Nop,
+                })
+            });
 
         a.chain(b).collect()
     }
